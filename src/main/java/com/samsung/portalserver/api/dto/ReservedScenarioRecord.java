@@ -1,0 +1,27 @@
+package com.samsung.portalserver.api.dto;
+
+import com.samsung.portalserver.domain.SimBoard;
+import lombok.Data;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Data
+public class ReservedScenarioRecord {
+    private Long key;
+    private Long no;
+    private String scenario;
+    private String simulator;
+    private List<String> user = new ArrayList<>();
+    private LocalDateTime reservationDate;
+
+    public ReservedScenarioRecord(Long no, SimBoard simBoard) {
+        this.key = no;
+        this.no = no;
+        this.scenario = simBoard.getScenario();
+        this.simulator = simBoard.getSimulator();
+        this.user.add(simBoard.getUser());
+        this.reservationDate = simBoard.getReservation_date();
+    }
+}
