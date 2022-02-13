@@ -5,6 +5,7 @@ import com.samsung.portalserver.repository.SimHistoryRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.zeroturnaround.zip.ZipUtil;
 
 import javax.servlet.http.HttpServletResponse;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class SimHistoryService {
     private final SimHistoryRepository simHistoryRepository;
     private final FileService fileService = new FileService();

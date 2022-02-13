@@ -15,6 +15,7 @@ public class ReservedScenarioRecord {
     private String simulator;
     private List<String> user = new ArrayList<>();
     private LocalDateTime reservationDate;
+    private Integer reservationServer;
 
     public ReservedScenarioRecord(Long no, SimBoard simBoard) {
         this.key = no;
@@ -23,5 +24,6 @@ public class ReservedScenarioRecord {
         this.simulator = simBoard.getSimulator();
         this.user.add(simBoard.getUser());
         this.reservationDate = simBoard.getReservation_date();
+        this.reservationServer = simBoard.getReservation_server();
     }
 }

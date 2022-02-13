@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 //@SpringBootTest
 class SimBoardServiceTest {
 
-    SimReservationService simReservationService = new SimReservationService(null, null);
+    ReservationService reservationService = new ReservationService(null, null);
     FileService fileService = new FileService();
 //    SimBoardService simBoardService;
 //    @Autowired
@@ -27,7 +27,7 @@ class SimBoardServiceTest {
                 + FileService.DIR_DELIMETER + "TESTCODE_SIMULATOR"
                 + FileService.DIR_DELIMETER + "TESTCODE_SCENARIO";
 
-        simReservationService.saveScenarioFile(saveDirectoryPath, multipartFile);
+        reservationService.saveScenarioFile(saveDirectoryPath, multipartFile);
 
         assertThat(fileService.aleadyExistFileOrDir(saveDirectoryPath)).isEqualTo(true);
 

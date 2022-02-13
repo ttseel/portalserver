@@ -25,7 +25,7 @@ public class FileService {
     public static final String FILE_DIR_ROOT_PATH = "/Users/js.oh/Desktop/Developers/simportal";
     public static final String HISTORY_DIR_PATH = "/Users/js.oh/Desktop/Developers/simportal/history";
     public static final String SIMULATOR_DIR_PATH = "/Users/js.oh/Desktop/Developers/simportal/simulator";
-    public static final String RESERVED_SCENARIO_DIR_PATH = "/Users/js.oh/Desktop/Developers/simportal/reserved_scenario";
+    public static final String CONFIG_DIR_PATH = "/Users/js.oh/Desktop/Developers/simportal/config";
 
     public void makeZipFiles(List<String> filePathIncludeNameAndExtention) {
         File resultZip = new File("/Users/js.oh/Desktop/result.zip");

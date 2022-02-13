@@ -19,7 +19,7 @@ public class CurrentRunningRecord {
     private Integer currentRep;
     private Integer requestRep;
     private String status;
-    private Integer serverNo;
+    private Integer executionServer;
 
     public CurrentRunningRecord(Long no, SimBoard simBoard) {
         this.key = no;
@@ -32,6 +32,6 @@ public class CurrentRunningRecord {
         this.currentRep = simBoard.getCurrent_rep();
         this.requestRep = simBoard.getRequest_rep();
         this.status = simBoard.getStatus();
-        this.serverNo = simBoard.getServer_no();
+        this.executionServer = simBoard.getExecution_server();
     }
 }

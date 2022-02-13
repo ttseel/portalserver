@@ -13,9 +13,13 @@ public interface SimBoardRepository {
 
     Optional<List<SimBoard>> readByUserAndStatus(String user, SimBoardStatus status);
 
+    Optional<SimBoard> readUniqueRecord(long no);
+
     Optional<SimBoard> readUniqueRecord(String user, String simulator, String scenario);
 
     void delete(SimBoard simBoard);
 
     void save(SimBoard simBoard);
+
+    long findNewSim(int executionServer);
 }

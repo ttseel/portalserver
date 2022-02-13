@@ -26,6 +26,8 @@ dependencies {
 	implementation group: 'org.zeroturnaround', name: 'zt-zip', version: '1.13'
 	// Directory를 쉽게 제거하는 메소드 제공 라이브러리: https://mvnrepository.com/artifact/commons-io/commons-io
 	implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+	// jna(java native access) 라이브러리. pid를 구하는 과정에서 사용: https://search.maven.org/artifact/net.java.dev.jna/jna-platform/5.10.0/jar
+	implementation group: 'net.java.dev.jna', name: 'jna-platform', version: '5.10.0'
 
 	implementation 'commons-io:commons-io:2.6'
 	implementation 'mysql:mysql-connector-java'

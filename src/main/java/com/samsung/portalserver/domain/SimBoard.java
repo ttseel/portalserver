@@ -32,8 +32,11 @@ public class SimBoard {
     @Column(name = "status")
     private String status;
 
-    @Column(name = "server_no")
-    private Integer server_no;
+    @Column(name = "reservation_server")
+    private Integer reservation_server;
+
+    @Column(name = "execution_server")
+    private Integer execution_server;
 
     @Column(name = "reservation_date")
     private LocalDateTime reservation_date;

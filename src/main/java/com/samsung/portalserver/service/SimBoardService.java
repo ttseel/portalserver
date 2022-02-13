@@ -62,6 +62,10 @@ public class SimBoardService {
         return simBoardList;
     }
 
+    public Optional<SimBoard> readUniqueRecord(long no) {
+        return simBoardRepository.readUniqueRecord(no);
+    }
+
     public Optional<SimBoard> readUniqueRecord(String user, String simulator, String scenario) {
         return simBoardRepository.readUniqueRecord(user, simulator, scenario);
     }
@@ -99,17 +103,7 @@ public class SimBoardService {
         return exist;
     }
 
-    public void reserveNewSimulation(SimBoardApiController.NewReservationDto newReservationDto) {
-        SimBoard simBoard = new SimBoard();
-        simBoard.setScenario(newReservationDto.getScenario());
-        simBoard.setSimulator(newReservationDto.getSimulator());
-        simBoard.setUser(newReservationDto.getUser());
-        simBoard.setCurrent_rep(1);
-        simBoard.setRequest_rep(99); //scenario config 파일에서 파싱
-        simBoard.setStatus(SimBoardStatus.RESERVED.name());
-        simBoard.setServer_no(99);
-        simBoard.setReservation_date(LocalDateTime.now());
-
-        simBoardRepository.save(simBoard);
+    public long findNewSimulation(int executionServer) {
+        return simBoardRepository.findNewSim(executionServer);
     }
 }

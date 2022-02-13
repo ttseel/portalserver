@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.ParameterMode;
+import javax.persistence.StoredProcedureQuery;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -46,11 +48,25 @@ public class SimBoardRepositoryImpl implements SimBoardRepository {
         return Optional.ofNullable(result);
     }
 
+    public Optional<SimBoard> readUniqueRecord(long no) {
+        List<SimBoard> result = em.createQuery("select sb from SimBoard as sb where sb.no = :no")
+                .setParameter("no", no)
+                .getResultList();
+
+        if (result.size() > 1) {
+            throw new IllegalStateException(
+                    String.format("There are duplicate scenarios. no: %s, simulator: %s, scenario: %s", String.valueOf(no))
+            );
+        }
+
+        return Optional.ofNullable(result.get(0));
+    }
+
     public Optional<SimBoard> readUniqueRecord(String user, String simulator, String scenario) {
         List<SimBoard> result = em.createQuery("select sb from SimBoard as sb where sb.user = :user and sb.simulator = :simulator and sb.scenario = :scenario")
                 .setParameter("user", user)
-                .setParameter("simulator", simulator.toString())
-                .setParameter("scenario", scenario.toString())
+                .setParameter("simulator", simulator)
+                .setParameter("scenario", scenario)
                 .getResultList();
 
         if (result.size() > 1) {
@@ -73,5 +89,17 @@ public class SimBoardRepositoryImpl implements SimBoardRepository {
     @Override
     public void save(SimBoard simBoard) {
         em.persist(simBoard);
+    }
+
+    @Override
+    public long findNewSim(int executionServer) {
+        StoredProcedureQuery query = em.createStoredProcedureQuery("HYPPEOPLE.usp_find_new_sim");
+        query.registerStoredProcedureParameter("execution_server", Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("sim_no", Long.class, ParameterMode.OUT);
+        query.setParameter("execution_server", executionServer);
+        boolean queryResult = query.execute();
+        Long result = (Long) query.getOutputParameterValue("sim_no");
+
+        return result;
     }
 }

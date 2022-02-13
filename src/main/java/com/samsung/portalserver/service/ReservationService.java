@@ -1,33 +1,51 @@
 package com.samsung.portalserver.service;
 
+import com.samsung.portalserver.api.dto.NewReservationDto;
 import com.samsung.portalserver.domain.SimBoard;
 import com.samsung.portalserver.domain.SimulatorCategory;
 import com.samsung.portalserver.repository.SimBoardRepository;
+import com.samsung.portalserver.repository.SimBoardStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-@RestController
+
+@Service
 @Transactional
-public class SimReservationService {
+public class ReservationService {
     private final SimBoardRepository simBoardRepository;
     private final SimBoardService simBoardService;
     private final FileService fileService = new FileService();
 
     @Autowired
-    public SimReservationService(SimBoardRepository simBoardRepository,
-                                 SimBoardService simBoardService) {
+    public ReservationService(SimBoardRepository simBoardRepository,
+                              SimBoardService simBoardService) {
         this.simBoardRepository = simBoardRepository;
         this.simBoardService = simBoardService;
+    }
+
+    public void reserveNewSimulation(NewReservationDto newReservationDto) {
+        SimBoard simBoard = new SimBoard();
+        simBoard.setScenario(newReservationDto.getScenario());
+        simBoard.setSimulator(newReservationDto.getSimulator());
+        simBoard.setUser(newReservationDto.getUser());
+        simBoard.setCurrent_rep(1);
+        simBoard.setRequest_rep(99); //scenario config 파일에서 파싱
+        simBoard.setStatus(SimBoardStatus.RESERVED.name());
+        simBoard.setExecution_server(99);
+        simBoard.setReservation_date(LocalDateTime.now());
+
+        simBoardRepository.save(simBoard);
     }
 
     public void cancelReservation(String user, String simulator, String scenario) {
