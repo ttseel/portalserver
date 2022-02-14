@@ -5,14 +5,19 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter @Setter
 public class SimulationJob implements Job {
 
     private Process process;
-    private String configDirPath;
+    private String configDirPath = "";
+    private String fslFilePath = "";
+    private List<String> fssFilePath = new ArrayList<>();
     private String scenario;
     private String simulator;
+    private String version;
     private String user;
     private Integer current_rep;
     private Integer request_rep;
@@ -29,6 +34,7 @@ public class SimulationJob implements Job {
     public SimulationJob(SimBoard simBoard) {
         this.scenario = simBoard.getScenario();
         this.simulator = simBoard.getSimulator();
+        this.version = simBoard.getVersion();
         this.user = simBoard.getUser();
         this.current_rep = simBoard.getCurrent_rep();
         this.request_rep = simBoard.getRequest_rep();

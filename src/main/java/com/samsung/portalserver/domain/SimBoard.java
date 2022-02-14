@@ -20,6 +20,9 @@ public class SimBoard {
     @Column(name = "simulator")
     private String simulator;
 
+    @Column(name = "version")
+    private String version;
+
     @Column(name = "user")
     private String user;
 

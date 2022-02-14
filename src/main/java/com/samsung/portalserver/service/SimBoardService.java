@@ -1,20 +1,16 @@
 package com.samsung.portalserver.service;
 
-import com.samsung.portalserver.api.SimBoardApiController;
 import com.samsung.portalserver.api.dto.CurrentRunningRecord;
-import com.samsung.portalserver.api.dto.ReservedScenarioRecord;
 import com.samsung.portalserver.api.dto.StatusAndMessageDto;
 import com.samsung.portalserver.domain.SimBoard;
 import com.samsung.portalserver.domain.SimHistory;
 import com.samsung.portalserver.repository.SimBoardRepository;
 import com.samsung.portalserver.repository.SimBoardStatus;
 import com.samsung.portalserver.repository.SimHistoryRepository;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,7 +45,7 @@ public class SimBoardService {
             }
         }
 
-        return Optional.ofNullable(currentRunningDto);
+        return Optional.of(currentRunningDto);
     }
 
     public Optional<List<SimBoard>> readByUserAndStatus(String user) {
@@ -73,28 +69,28 @@ public class SimBoardService {
     public Optional<StatusAndMessageDto> validatePossibleToReserveScenario(String user, String simulator, String scenario) {
         StatusAndMessageDto statusAndMessageDto = new StatusAndMessageDto();
 
-        if (aleadyExistInSimBoard(user, simulator, scenario)) {
+        if (alreadyExistInSimBoard(user, simulator, scenario)) {
             statusAndMessageDto.setStatus(false);
-            statusAndMessageDto.getMessage().add("This scenario is aleady on the Reserved table");
-            return Optional.ofNullable(statusAndMessageDto); // 검증 실패하면 바로 return: 이미 실패했으므로 후속 조건 검증으로 인한 부하를 피한다.
+            statusAndMessageDto.getMessage().add("This scenario is already on the Reserved table");
+            return Optional.of(statusAndMessageDto); // 검증 실패하면 바로 return: 이미 실패했으므로 후속 조건 검증으로 인한 부하를 피한다.
         }
-        if (aleadyExistInSimHisotry(user, simulator, scenario)) {
+        if (alreadyExistInSimHistory(user, simulator, scenario)) {
             statusAndMessageDto.setStatus(false);
-            statusAndMessageDto.getMessage().add("This scenario is aleady on the My History table");
+            statusAndMessageDto.getMessage().add("This scenario is already on the My History table");
 
-            return Optional.ofNullable(statusAndMessageDto);
+            return Optional.of(statusAndMessageDto);
         }
 
         statusAndMessageDto.setStatus(true);
         statusAndMessageDto.getMessage().add("You can reserve scenario now");
-        return Optional.ofNullable(statusAndMessageDto);
+        return Optional.of(statusAndMessageDto);
     }
 
-    private boolean aleadyExistInSimBoard(String user, String simulator, String scenario) {
+    private boolean alreadyExistInSimBoard(String user, String simulator, String scenario) {
         return readUniqueRecord(user, simulator, scenario).isPresent();
     }
 
-    private boolean aleadyExistInSimHisotry(String user, String simulator, String scenario) {
+    private boolean alreadyExistInSimHistory(String user, String simulator, String scenario) {
         boolean exist = false;
         Optional<List<SimHistory>> simHistories = simHistoryRepository.readByUserAndSimulatorAndScenario(user, simulator, scenario);
         if (simHistories.isPresent() && simHistories.get().size() > 0) {

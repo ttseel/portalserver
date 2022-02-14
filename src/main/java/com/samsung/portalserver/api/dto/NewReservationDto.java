@@ -9,6 +9,7 @@ import java.util.List;
 public class NewReservationDto {
     private String user;
     private String simulator;
+    private String version;
     private String scenario;
     private MultipartFile fslFile;
     private List<MultipartFile> fssFiles;

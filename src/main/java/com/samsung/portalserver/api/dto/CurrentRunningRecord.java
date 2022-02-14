@@ -13,6 +13,7 @@ public class CurrentRunningRecord {
     private Long no;
     private String scenario;
     private String simulator;
+    private String version;
     private List<String> user = new ArrayList<>();
     private LocalDateTime startDate;
     private Integer runningTime;
@@ -25,6 +26,7 @@ public class CurrentRunningRecord {
         this.key = no;
         this.no = no;
         this.scenario = simBoard.getScenario();
+        this.version = simBoard.getVersion();
         this.simulator = simBoard.getSimulator();
         this.user.add(simBoard.getUser());
         this.startDate = simBoard.getStart_date();
