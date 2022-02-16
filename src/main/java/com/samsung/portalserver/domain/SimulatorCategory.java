@@ -14,6 +14,15 @@ public enum SimulatorCategory {
             case "AMHS_SIM":
                 category = AMHS_SIM;
                 break;
+             case "MCPSIM":
+                category = MCPSIM;
+                break;
+            case "OCS3SIM":
+                category = OCS3SIM;
+                break;
+            case "OCS4SIM":
+                category = OCS4SIM;
+                break;
             case "SEEFLOW":
                 category = SeeFlow;
                 break;

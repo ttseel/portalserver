@@ -7,7 +7,7 @@ class SimulatorCategoryTest {
 
     @Test
     void getSimulationNameTest(){
-        assertThat(SimulatorCategory.AMHS_SIM.name()).isEqualTo("AMHS_SIM");
+        assertThat(SimulatorCategory.MCPSIM.name()).isEqualTo("MCPSIM");
         assertThat(SimulatorCategory.SeeFlow.name()).isEqualTo("SeeFlow");
         assertThat(SimulatorCategory.REMOTE_SIM.name()).isEqualTo("REMOTE_SIM");
     }

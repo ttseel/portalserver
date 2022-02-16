@@ -15,6 +15,8 @@ public class SimulationJob implements Job {
     private String configDirPath = "";
     private String fslFilePath = "";
     private List<String> fssFilePath = new ArrayList<>();
+    private Long simBoardPKNo;
+    private String fslName;
     private String scenario;
     private String simulator;
     private String version;
@@ -32,6 +34,8 @@ public class SimulationJob implements Job {
     public SimulationJob() {}
 
     public SimulationJob(SimBoard simBoard) {
+        this.simBoardPKNo = simBoard.getNo();
+        this.fslName = simBoard.getFsl_name();
         this.scenario = simBoard.getScenario();
         this.simulator = simBoard.getSimulator();
         this.version = simBoard.getVersion();

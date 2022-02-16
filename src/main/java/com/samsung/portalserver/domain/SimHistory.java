@@ -15,23 +15,35 @@ public class SimHistory {
     @Column(name = "no")
     private Long no;
 
+    @Column(name = "fsl_name")
+    private String fsl_name;
+
     @Column(name = "scenario")
     private String scenario;
 
     @Column(name = "simulator")
     private String simulator;
 
+    @Column(name = "version")
+    private String version;
+
     @Column(name = "user")
     private String user;
 
-    @Column(name = "replication")
-    private Integer replication;
+    @Column(name = "completed_rep")
+    private Integer completed_rep;
+
+    @Column(name = "request_rep")
+    private Integer request_rep;
 
     @Column(name = "termination_reason")
     private String termination_reason;
 
-    @Column(name = "server_no")
-    private Integer server_no;
+    @Column(name = "reservation_server")
+    private Integer reservation_server;
+
+    @Column(name = "execution_server")
+    private Integer execution_server;
 
     @Column(name = "reservation_date")
     private LocalDateTime reservation_date;

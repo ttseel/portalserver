@@ -1,30 +1,36 @@
 package com.samsung.portalserver.schedule;
 
 import com.samsung.portalserver.domain.SimBoard;
+import com.samsung.portalserver.domain.SimulatorCategory;
 import com.samsung.portalserver.repository.SimBoardStatus;
 import com.samsung.portalserver.schedule.job.Job;
 import com.samsung.portalserver.schedule.job.SimulationJob;
+import com.samsung.portalserver.service.FileService;
 import com.samsung.portalserver.service.SimBoardService;
+import com.samsung.portalserver.service.SimHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Optional;
+import java.util.*;
+
+import static com.samsung.portalserver.domain.SimulatorCategory.MCPSIM;
 
 @Component
 public class JobSchedulerImpl implements JobScheduler, Observer {
 
-    private static final Integer EXECUTION_SERVER_IP_TEMP = 99;
+    public static final Integer CURRENT_SERVER_TEMP = 99;
 
     @Autowired
     private SimBoardService simBoardService;
     @Autowired
+    private SimHistoryService simHistoryService;
+    @Autowired
     private WorkloadManager workloadManager;
     @Autowired
     private ProgressMonitor progressMonitor;
+    private FileService fileService = new FileService();
+
 
     // DI로 주입하기(wm, pm)
 //    public JobSchedulerImpl(WorkloadManager workloadManager, ProgressMonitor progressMonitor) {
@@ -44,11 +50,11 @@ public class JobSchedulerImpl implements JobScheduler, Observer {
 
                 if(candidate.isPresent()) {
                     Job newJob = new SimulationJob(candidate.get());
+                    
                     // try scheduling
-
                     prepare(newJob);
-
                     executeJob(newJob);
+                    this.progressMonitor.addNewJob(newJob);
                 }
             }
         } catch (Exception e) {
@@ -60,14 +66,14 @@ public class JobSchedulerImpl implements JobScheduler, Observer {
         Optional<SimBoard> newJob = Optional.empty();
 
         // 저장 프로시저 실행
-        long no = simBoardService.findNewSimulation(EXECUTION_SERVER_IP_TEMP);
+        long no = simBoardService.findNewSimulation(CURRENT_SERVER_TEMP);
 
         newJob = simBoardService.readUniqueRecord(no);
         if (!checkSuccessToFind(newJob)) {
             String errorMsg = String.format(
                     "The execution server of SIM_BOARD(no: %d) and the current server are different.\n" +
                     "Current server is %d, but execution server of SIM_BOARD is %d",
-                    no, EXECUTION_SERVER_IP_TEMP, newJob.get().getExecution_server()
+                    no, CURRENT_SERVER_TEMP, newJob.get().getExecution_server()
             );
             throw new IllegalStateException(errorMsg);
         }
@@ -75,81 +81,121 @@ public class JobSchedulerImpl implements JobScheduler, Observer {
     }
 
     private boolean checkSuccessToFind(Optional<SimBoard> newJob) {
-        return newJob.isPresent() && newJob.get().getExecution_server() == EXECUTION_SERVER_IP_TEMP;
+        return newJob.isPresent() && Objects.equals(newJob.get().getExecution_server(), CURRENT_SERVER_TEMP);
     }
 
     @Override
     public void prepare(Job job) {
         SimulationJob simulationJob = (SimulationJob) job;
 
-        // GET Scenario Config
-        prepareScenarioConfigFiles(job);
+        String configPath = FileService.HISTORY_DIR_PATH
+                + FileService.DIR_DELIMETER + simulationJob.getUser()
+                + FileService.DIR_DELIMETER + simulationJob.getSimulator()
+                + FileService.DIR_DELIMETER + simulationJob.getFslName()
+                + FileService.DIR_DELIMETER + FileService.CONFIG_DIR_NAME;
 
-        // set scenario config path
-        simulationJob.setConfigDirPath("");
+        // Set scenario config path
+        simulationJob.setConfigDirPath(configPath);
+
+        // Prepare Scenario Config
+        prepareScenarioConfigFiles(simulationJob);
     }
 
-    public void prepareScenarioConfigFiles(Job newJob) {
-
-        if (existInCurrentServer()) {
-            // 현재 서버에 있는지 체크
-
-        } else {
-            // 현재 서버에 없다면 다른 서버에 요청
-
-            // 정상적으로 받았으면 삭제 요청
+    public void prepareScenarioConfigFiles(SimulationJob job) {
+        if (!existInCurrentServer(job)) {
+            // 현재 서버에 없다면 다른 서버에 요청(요청 받는 서버에서 삭제까지 수행)
+            requestSimConfigFiles(job);
+            moveToConfigDirectory(job);
         }
-        
-        moveToConfigDirectory();
+        setFslAndFssFileName(job);
     }
 
-    private boolean existInCurrentServer() {
-        return false;
+    private boolean existInCurrentServer(SimulationJob job) {
+        return Objects.equals(job.getReservation_server(), CURRENT_SERVER_TEMP);
     }
 
-    private void moveToConfigDirectory() {
+    private void setFslAndFssFileName(SimulationJob job) {
+        List<String> fileNameList = fileService.getFileList(job.getConfigDirPath());
+        fileNameList.forEach(fileName -> {
+            String[] splited = fileName.split("\\.");
+            String extension = splited[splited.length-1];
+            if (extension.equals( "fsl")) {
+                job.setFslFilePath(job.getConfigDirPath() + FileService.DIR_DELIMETER + fileName);
+            } else if (extension.equals("fss")) {
+                job.getFssFilePath().add(job.getConfigDirPath() + FileService.DIR_DELIMETER + fileName);
+            }
+        });
+    }
+
+    private void requestSimConfigFiles(SimulationJob job) {
+
+    }
+
+    private void moveToConfigDirectory(SimulationJob job) {
+        fileService.createDirectories(job.getConfigDirPath());
+//        job.setConfigDirPath();
     }
 
     @Override
     public void executeJob(Job job) {
         SimulationJob simulationJob = (SimulationJob) job;
 
-        Optional<Process> process = runSimulation(simulationJob);
+        Optional<Process> process = SimulationProcessFactory(simulationJob);
         process.ifPresent(p -> simulationJob.setProcess(p));
-
-        this.progressMonitor.addNewJob(simulationJob);
     }
 
-    private Optional<Process> runSimulation(SimulationJob job) {
-        // process 생성하는 부분 팩토리 메서드 패턴으로 수정
-        Optional<Process> process = Optional.empty();
-
+    // process 생성하는 부분 팩토리 메서드 패턴으로 수정
+    private Optional<Process> SimulationProcessFactory(SimulationJob job) {
         Runtime rt = Runtime.getRuntime();
+        Process process = null;
+
+        String executeCmd = String.format("java -jar %s/%s_%s.jar", FileService.SIMULATOR_DIR_PATH, job.getSimulator(), job.getVersion());
+        String args = "";
         try {
-            Process p = rt.exec("jps -l");
-            process = Optional.ofNullable(p);
+            switch (SimulatorCategory.getCategoryByString(job.getSimulator())) {
+                case MCPSIM:
+                    args = "";
+                    process = rt.exec(executeCmd + args);
+                    break;
+                case OCS3SIM:
+                    args = "";
+                    process = rt.exec(executeCmd + args);
+                    break;
+                case OCS4SIM:
+                    args = "";
+                    process = rt.exec(executeCmd + args);
+                    break;
+                case SeeFlow:
+                    args = "";
+                    process = rt.exec(executeCmd + args);
+                    break;
+                case REMOTE_SIM:
+                    args = "";
+                    process = rt.exec(executeCmd + args);
+                    break;
+                default:
+                    process = null;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return process;
+        return Optional.ofNullable(process);
     }
 
     @Override
     public void update(Observable o, Object arg) {
         List<SimulationJob> statusChangedJobs = (List<SimulationJob>) arg;
         for (SimulationJob job : statusChangedJobs) {
-            // update SIM_BOARD
-
             if (isTerminated(job)) {
-                // 프로시저로 구현
-                // delete record from SIM_BOARD
-                // add record to SIM_HISTORY
-
+                // procedure: delete record from SIM_BOARD, add record to SIM_HISTORY
+                simHistoryService.moveFromBoardToHistory(job);
                 // remove job from progress monitor
-                this.progressMonitor.removeJob(job);
+                progressMonitor.removeJob(job);
+            } else {
+                // update SIM_BOARD: current_rep
+                simBoardService.updateCurrentRep(job.getSimBoardPKNo(), job.getCurrent_rep());
             }
         }
-
     }
 
     private boolean isTerminated(SimulationJob job) {

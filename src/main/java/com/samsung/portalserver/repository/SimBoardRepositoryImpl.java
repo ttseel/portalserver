@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.persistence.ParameterMode;
 import javax.persistence.StoredProcedureQuery;
 import java.io.File;
@@ -101,5 +102,10 @@ public class SimBoardRepositoryImpl implements SimBoardRepository {
         Long result = (Long) query.getOutputParameterValue("sim_no");
 
         return result;
+    }
+
+    @Override
+    public void commit() {
+        em.flush();
     }
 }

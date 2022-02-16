@@ -102,4 +102,14 @@ public class SimBoardService {
     public long findNewSimulation(int executionServer) {
         return simBoardRepository.findNewSim(executionServer);
     }
+
+    public void updateCurrentRep(Long simBoardPKNo, int currentRep) {
+        Optional<SimBoard> simBoard = simBoardRepository.readUniqueRecord(simBoardPKNo);
+        simBoard.ifPresent(sb -> sb.setCurrent_rep(currentRep));
+        // 이후 Commit 되는 시점에서 JPA가 Entity의 변화를 확인하고 update 쿼리를 DB에 날려준 뒤 Transaction이 종료됨
+    }
+
+    public void commitSimBoard() {
+        simBoardRepository.commit();
+    }
 }

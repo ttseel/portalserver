@@ -22,4 +22,6 @@ public interface SimBoardRepository {
     void save(SimBoard simBoard);
 
     long findNewSim(int executionServer);
+
+    void commit();
 }

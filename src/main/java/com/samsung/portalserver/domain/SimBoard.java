@@ -14,6 +14,9 @@ public class SimBoard {
     @Column(name = "no")
     private Long no;
 
+    @Column(name = "fsl_name")
+    private String fsl_name;
+
     @Column(name = "scenario")
     private String scenario;
 

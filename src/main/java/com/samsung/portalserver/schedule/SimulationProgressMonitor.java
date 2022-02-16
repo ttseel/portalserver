@@ -54,7 +54,11 @@ public class SimulationProgressMonitor extends ProgressMonitor {
 
         // status & end_date & termination_reason check
         if (!simulationJob.getProcess().isAlive()){
+            // status
             simulationJob.setStatus(SimBoardStatus.TERMINATED.name());
+            // end_date
+
+            // termination_reason
 
             isChanged = true;
         }
