@@ -9,7 +9,6 @@ import com.samsung.portalserver.service.SimBoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,13 +30,13 @@ public class ReservationApiController {
         statusAndMessageDto.setStatus(false);
         statusAndMessageDto.getMessage().add("Reservation request has failed");
 
-        String saveDirectoryPath = FileService.CONFIG_DIR_PATH;
-        String newName = FileService.DIR_DELIMETER + newReservationDto.getUser()
-                + FileService.NAME_DELIMETER + newReservationDto.getSimulator()
-                + FileService.NAME_DELIMETER + newReservationDto.getScenario()
-                + FileService.NAME_DELIMETER + newReservationDto.getFslFile().getOriginalFilename();
+        String saveDirectoryPath = FileService.HISTORY_DIR_PATH +
+                FileService.DIR_DELIMETER + newReservationDto.getUser()
+                + FileService.DIR_DELIMETER + newReservationDto.getSimulator()
+                + FileService.DIR_DELIMETER + newReservationDto.getFslName()
+                + FileService.DIR_DELIMETER + FileService.CONFIG_DIR_NAME;
 
-        boolean isSuccessSaveTheFile = reservationService.saveScenarioFile(saveDirectoryPath, newName, newReservationDto.getFslFile());
+        boolean isSuccessSaveTheFile = reservationService.saveScenarioFile(saveDirectoryPath, newReservationDto.getFslFile(), newReservationDto.getFssFiles());
         if (isSuccessSaveTheFile) {
             try {
                 reservationService.reserveNewSimulation(newReservationDto);
@@ -78,10 +77,10 @@ public class ReservationApiController {
     @GetMapping("/api/simulation/reservation/validate-reserve")
     public Optional<StatusAndMessageDto> validatePossibleToNewReservation(@RequestParam("user") String user,
                                                                           @RequestParam("simulator") String simulator,
-                                                                          @RequestParam("scenario") String scenario) {
+                                                                          @RequestParam("scenarioList") List<String> scenarioList) {
 
         Optional<StatusAndMessageDto> statusAndMessageDto
-                = simBoardService.validatePossibleToReserveScenario(user.toUpperCase(), simulator, scenario);
+                = simBoardService.validatePossibleToReserveScenario(user.toUpperCase(), simulator, scenarioList);
 
         return statusAndMessageDto;
     }

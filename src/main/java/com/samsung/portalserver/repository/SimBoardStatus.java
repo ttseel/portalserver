@@ -1,5 +1,5 @@
 package com.samsung.portalserver.repository;
 
 public enum SimBoardStatus {
-    RUNNING, RESERVED, TERMINATED
+    RUNNING, RESERVED, ERROR
 }

@@ -12,6 +12,10 @@ public class StatusAndMessageDto {
 
     public StatusAndMessageDto() {}
 
+    public StatusAndMessageDto(Boolean status) {
+        Status = status;
+    }
+
     public StatusAndMessageDto(Boolean status, List<String> message) {
         Status = status;
         Message = message;

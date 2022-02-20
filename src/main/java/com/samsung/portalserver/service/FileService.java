@@ -26,6 +26,7 @@ public class FileService {
     public static final String HISTORY_DIR_PATH = "/Users/js.oh/Desktop/Developers/simportal/history";
     public static final String SIMULATOR_DIR_PATH = "/Users/js.oh/Desktop/Developers/simportal/simulator";
     public static final String CONFIG_DIR_PATH = "/Users/js.oh/Desktop/Developers/simportal/config";
+    public static final String CONFIG_DIR_NAME = "config";
 
     public void makeZipFiles(List<String> filePathIncludeNameAndExtention) {
         File resultZip = new File("/Users/js.oh/Desktop/result.zip");
@@ -74,7 +75,6 @@ public class FileService {
                     .filter(file -> file.charAt(0) != '.') // .DS_Store 같은 시스템이 생성하는 파일 제외
                     .collect(Collectors.toList());
         }
-
         return fileList;
     }
 
@@ -83,14 +83,23 @@ public class FileService {
         return file.exists();
     }
 
-    public void saveMultipartFileToLocal(String directoryPath, MultipartFile multipartFile) {
-        saveMultipartFileToLocal(directoryPath, multipartFile.getOriginalFilename(), multipartFile);
+    public void saveMultipartFileToLocal(String directoryPath, MultipartFile fslFile, List<MultipartFile> fssFiles) {
+        try {
+            File fsl = new File(directoryPath + DIR_DELIMETER + fslFile.getOriginalFilename());
+            fslFile.transferTo(fsl);
+            for (MultipartFile fssFile : fssFiles) {
+                File fss = new File(directoryPath + DIR_DELIMETER + fssFile.getOriginalFilename());
+                fssFile.transferTo(fss);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void saveMultipartFileToLocal(String directoryPath, String newName, MultipartFile multipartFile) {
+    public void createDirectories(String path) {
+        Path dirPath = Paths.get(path);
         try {
-            File file = new File(directoryPath + DIR_DELIMETER + newName);
-            multipartFile.transferTo(file);
+            Files.createDirectories(dirPath);
         } catch (IOException e) {
             e.printStackTrace();
         }

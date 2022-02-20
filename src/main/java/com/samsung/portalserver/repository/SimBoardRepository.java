@@ -11,6 +11,8 @@ public interface SimBoardRepository {
 
     Optional<List<SimBoard>> readByStatus(SimBoardStatus status);
 
+    Optional<List<SimBoard>> readByUserAndSimulator(String user, String simulator);
+
     Optional<List<SimBoard>> readByUserAndStatus(String user, SimBoardStatus status);
 
     Optional<SimBoard> readUniqueRecord(long no);

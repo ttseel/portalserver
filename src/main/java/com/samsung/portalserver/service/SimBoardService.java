@@ -13,7 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Transactional
@@ -66,25 +68,41 @@ public class SimBoardService {
         return simBoardRepository.readUniqueRecord(user, simulator, scenario);
     }
 
-    public Optional<StatusAndMessageDto> validatePossibleToReserveScenario(String user, String simulator, String scenario) {
-        StatusAndMessageDto statusAndMessageDto = new StatusAndMessageDto();
+    public Optional<StatusAndMessageDto> validatePossibleToReserveScenario(String user, String simulator, List<String> scenarioList) {
+        StatusAndMessageDto statusAndMessageDto = new StatusAndMessageDto(true);
 
-        if (alreadyExistInSimBoard(user, simulator, scenario)) {
-            statusAndMessageDto.setStatus(false);
-            statusAndMessageDto.getMessage().add("This scenario is already on the Reserved table");
-            return Optional.of(statusAndMessageDto); // 검증 실패하면 바로 return: 이미 실패했으므로 후속 조건 검증으로 인한 부하를 피한다.
+        Optional<List<SimBoard>> records = simBoardRepository.readByUserAndSimulator(user, simulator);
+
+        if (records.isPresent() && records.get().size() > 0) {
+            Map<String, Boolean> scenarioMap = new ConcurrentHashMap<>();
+            for (SimBoard simBoard : records.get()) {
+                scenarioMap.put(simBoard.getScenario(), true);
+            }
+
+            StringBuilder validationMessage = new StringBuilder("Some scenarios already exist in the Reserved or History: ");
+            for (int i = 0; i < scenarioList.size(); i++) {
+                if (scenarioMap.containsKey(scenarioList.get(i))) {
+                    statusAndMessageDto.setStatus(false);
+                    validationMessage.append(scenarioList.get(i));
+                    if (!isLastScenario(i, scenarioList.size()-1)) {
+                        validationMessage.append(", ");
+                    }
+                }
+            }
+
+            if (statusAndMessageDto.getStatus()) {
+                statusAndMessageDto.getMessage().add("You can reserve scenario now");
+            } else {
+                statusAndMessageDto.getMessage().add(validationMessage.toString());
+            }
         }
-        if (alreadyExistInSimHistory(user, simulator, scenario)) {
-            statusAndMessageDto.setStatus(false);
-            statusAndMessageDto.getMessage().add("This scenario is already on the My History table");
-
-            return Optional.of(statusAndMessageDto);
-        }
-
-        statusAndMessageDto.setStatus(true);
-        statusAndMessageDto.getMessage().add("You can reserve scenario now");
         return Optional.of(statusAndMessageDto);
     }
+
+    private boolean isLastScenario(int i, int lastIdx) {
+        return i == lastIdx;
+    }
+
 
     private boolean alreadyExistInSimBoard(String user, String simulator, String scenario) {
         return readUniqueRecord(user, simulator, scenario).isPresent();
@@ -107,6 +125,11 @@ public class SimBoardService {
         Optional<SimBoard> simBoard = simBoardRepository.readUniqueRecord(simBoardPKNo);
         simBoard.ifPresent(sb -> sb.setCurrent_rep(currentRep));
         // 이후 Commit 되는 시점에서 JPA가 Entity의 변화를 확인하고 update 쿼리를 DB에 날려준 뒤 Transaction이 종료됨
+    }
+
+    public void updateStatus(Long simBoardPKNo, String status) {
+        Optional<SimBoard> simBoard = simBoardRepository.readUniqueRecord(simBoardPKNo);
+        simBoard.ifPresent(sb -> sb.setStatus(status));
     }
 
     public void commitSimBoard() {
