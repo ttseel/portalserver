@@ -30,7 +30,7 @@ class JobSchedulerImplTest {
     }
 
     @Test
-    void executeJob() {
+    void executeJob() throws IOException {
         Job simulationJob = new SimulationJob(null);
         jobScheduler.executeJob(simulationJob);
     }
