@@ -8,6 +8,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class FileServiceTest {
+
     FileService fileService = new FileService();
 
     @Test
@@ -32,18 +33,14 @@ class FileServiceTest {
         /**
          * 유효하지 않은 path의 파일 개수 = 0
          */
-        ArrayList<String> unvalidResult = fileService.getFileList(
-                "unvalidPath"
-        );
+        ArrayList<String> unvalidResult = fileService.getFileList("unvalidPath");
         assertThat(unvalidResult.size()).isEqualTo(0);
 
         /**
          * simulator 종류 = 3 (AMHS_SIM, SeeFlow, REMOTE_SIM)
          * Fail일 경우 PATH 설정 필요
          */
-        ArrayList<String> fileList = fileService.getFileList(
-                FileService.SIMULATOR_DIR_PATH
-        );
+        ArrayList<String> fileList = fileService.getFileList(FileService.SIMULATOR_DIR_PATH);
 
         assertThat(fileList.size()).isEqualTo(3);
     }

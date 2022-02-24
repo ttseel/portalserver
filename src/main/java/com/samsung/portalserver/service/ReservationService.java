@@ -22,19 +22,20 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @Transactional
 public class ReservationService {
+
     private final SimBoardRepository simBoardRepository;
     private final SimBoardService simBoardService;
     private final FileService fileService = new FileService();
 
     @Autowired
     public ReservationService(SimBoardRepository simBoardRepository,
-                              SimBoardService simBoardService) {
+        SimBoardService simBoardService) {
         this.simBoardRepository = simBoardRepository;
         this.simBoardService = simBoardService;
     }
 
     public void reserveNewSimulation(NewReservationDto newReservationDto) {
-        for(String fssName : newReservationDto.getFssNameList()) {
+        for (String fssName : newReservationDto.getFssNameList()) {
             SimBoard simBoard = new SimBoard();
             simBoard.setFsl_name(newReservationDto.getFslName());
             simBoard.setScenario(fssName);
@@ -54,12 +55,13 @@ public class ReservationService {
 
     public void cancelReservation(String user, String simulator, String scenario) {
         SimBoard simBoard = (SimBoard) simBoardService.readUniqueRecord(user, simulator, scenario)
-                .orElseThrow(() -> new IllegalStateException("There is no scenario to cancel"));
+            .orElseThrow(() -> new IllegalStateException("There is no scenario to cancel"));
 
         simBoardRepository.delete(simBoard);
     }
 
-    public Optional<Map<String, ArrayList<String>>> getSimulatorVersionList(SimulatorCategory simulator) {
+    public Optional<Map<String, ArrayList<String>>> getSimulatorVersionList(
+        SimulatorCategory simulator) {
         ArrayList<String> mcpsimVersions = new ArrayList<>();
         ArrayList<String> ocs3simVersions = new ArrayList<>();
         ArrayList<String> ocs4simVersions = new ArrayList<>();
@@ -68,21 +70,21 @@ public class ReservationService {
 
         Map<String, ArrayList<String>> SimulationVersion = new ConcurrentHashMap<>();
 
-        if(simulator.equals(SimulatorCategory.ALL)) {
+        if (simulator.equals(SimulatorCategory.ALL)) {
             mcpsimVersions = getEachVersionList(SimulatorCategory.MCPSIM).get();
             ocs3simVersions = getEachVersionList(SimulatorCategory.OCS3SIM).get();
             ocs4simVersions = getEachVersionList(SimulatorCategory.OCS4SIM).get();
             seeflowVersions = getEachVersionList(SimulatorCategory.SeeFlow).get();
             remoteSimVersions = getEachVersionList(SimulatorCategory.REMOTE_SIM).get();
-        } else if(simulator.equals(SimulatorCategory.MCPSIM)) {
+        } else if (simulator.equals(SimulatorCategory.MCPSIM)) {
             mcpsimVersions = getEachVersionList(SimulatorCategory.MCPSIM).get();
-        } else if(simulator.equals(SimulatorCategory.OCS3SIM)) {
+        } else if (simulator.equals(SimulatorCategory.OCS3SIM)) {
             ocs3simVersions = getEachVersionList(SimulatorCategory.OCS3SIM).get();
-        } else if(simulator.equals(SimulatorCategory.OCS4SIM)) {
+        } else if (simulator.equals(SimulatorCategory.OCS4SIM)) {
             ocs4simVersions = getEachVersionList(SimulatorCategory.OCS4SIM).get();
-        } else if(simulator.equals(SimulatorCategory.SeeFlow)) {;
+        } else if (simulator.equals(SimulatorCategory.SeeFlow)) {
             seeflowVersions = getEachVersionList(SimulatorCategory.SeeFlow).get();
-        } else if(simulator.equals(SimulatorCategory.REMOTE_SIM)) {
+        } else if (simulator.equals(SimulatorCategory.REMOTE_SIM)) {
             remoteSimVersions = getEachVersionList(SimulatorCategory.REMOTE_SIM).get();
         } else {
             throw new IllegalArgumentException("UI Simulator 이름과 서버의 시뮬레이터 디렉토리 이름 불일치");
@@ -99,22 +101,21 @@ public class ReservationService {
 
     public Optional<ArrayList<String>> getEachVersionList(SimulatorCategory simulatorName) {
         ArrayList<String> versions = fileService.getFileList(
-                FileService.SIMULATOR_DIR_PATH
-                        + FileService.DIR_DELIMETER
-                        + simulatorName.toString()
-        );
+            FileService.SIMULATOR_DIR_PATH + FileService.DIR_DELIMETER + simulatorName.toString());
 
         versions.sort(Comparator.reverseOrder());
         return Optional.ofNullable(versions);
     }
 
-    public boolean saveScenarioFile(String saveDirectoryPath, MultipartFile fslFile, List<MultipartFile> fssFiles) {
+    public boolean saveScenarioFile(String saveDirectoryPath, MultipartFile fslFile,
+        List<MultipartFile> fssFiles) {
         try {
             Files.createDirectories(Paths.get(saveDirectoryPath));
             fileService.saveMultipartFileToLocal(saveDirectoryPath, fslFile, fssFiles);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return fileService.aleadyExistFileOrDir(saveDirectoryPath + FileService.DIR_DELIMETER + fslFile.getOriginalFilename());
+        return fileService.aleadyExistFileOrDir(
+            saveDirectoryPath + FileService.DIR_DELIMETER + fslFile.getOriginalFilename());
     }
 }

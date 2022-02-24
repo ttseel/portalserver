@@ -18,7 +18,8 @@ class ProcessManagerTest {
         String processName = "sun.tools.jps.Jps";
         Map<Integer, Boolean> processIds = ProcessManager.findProcessIdByName(processName);
 
-        if (processIds.size() != 1)
+        if (processIds.size() != 1) {
             throw new IllegalStateException();
+        }
     }
 }

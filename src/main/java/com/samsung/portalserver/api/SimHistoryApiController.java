@@ -12,25 +12,25 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 public class SimHistoryApiController {
+
     private final SimHistoryService simHistoryService;
 
     @GetMapping("/api/simulation/my-simulation/my-history")
-    private Optional<List<SimHistoryService.MyHistoryDto>> readMyHistory(@RequestParam("user") String user) {
+    private Optional<List<SimHistoryService.MyHistoryDto>> readMyHistory(
+        @RequestParam("user") String user) {
         return simHistoryService.readMyHistory(user.toUpperCase());
     }
 
     @DeleteMapping("/api/simulation/my-simulation/delete-my-history")
     private Boolean deleteMyHistory(@RequestParam("user") String user,
-                                    @RequestParam("simulator") String simulator,
-                                    @RequestParam("scenario") String scenario) {
+        @RequestParam("simulator") String simulator, @RequestParam("scenario") String scenario) {
         return true;
     }
 
     @GetMapping("/api/simulation/my-simulation/download-my-history")
     private void downloadMyHistory(@RequestParam("user") String user,
-                                   @RequestParam("simulator") String simulator,
-                                   @RequestParam("scenario") String scenario,
-                                   HttpServletResponse response) {
+        @RequestParam("simulator") String simulator, @RequestParam("scenario") String scenario,
+        HttpServletResponse response) {
 
         simHistoryService.downloadMyHistory(user, simulator, scenario, response);
     }

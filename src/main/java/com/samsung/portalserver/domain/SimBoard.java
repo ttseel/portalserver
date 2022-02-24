@@ -8,9 +8,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "sim_board")
-@Getter @Setter
+@Getter
+@Setter
 public class SimBoard {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "no")
     private Long no;
 

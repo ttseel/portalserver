@@ -14,7 +14,7 @@ public enum SimulatorCategory {
             case "AMHS_SIM":
                 category = AMHS_SIM;
                 break;
-             case "MCPSIM":
+            case "MCPSIM":
                 category = MCPSIM;
                 break;
             case "OCS3SIM":
@@ -35,30 +35,4 @@ public enum SimulatorCategory {
         }
         return category;
     }
-//    ALL("ALL"), AMHS_SIM("AMHS Sim"), SeeFlow("SeeFlow"), REMOTE_SIM("Remote Sim");
-
-//    @Getter
-//    private final String displayName;
-//    SimulatorCategory(String displayName) {
-//        this.displayName = displayName;
-//    }
-//
-//    public static String getCategoryByDisplayName(String displayName) {
-//        String category = "";
-//        switch (displayName) {
-//            case "ALL":
-//                category = "ALL";
-//                break;
-//            case "AMHS Sim":
-//                category = "AMHS_SIM";
-//                break;
-//            case "SeeFlow":
-//                category = "SEEFLOW";
-//                break;
-//            default:
-//                category = "NOT_FOUND";
-//                break;
-//        }
-//        return category;
-//    }
 }

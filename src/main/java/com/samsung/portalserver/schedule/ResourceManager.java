@@ -10,10 +10,11 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 
 public class ResourceManager {
-    private final OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
+
+    private final OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(
+        OperatingSystemMXBean.class);
 
     /**
-     *
      * @param path: directory path
      * @return usable storage size (Gigabytes)
      */
@@ -28,13 +29,13 @@ public class ResourceManager {
     }
 
     /**
-     *
      * @param path: directory path
      * @return usable storage ratio
      */
     public double getUsableStorageRatio(String path) {
         File file = new File(path);
-        return Math.round((1 - ((double) file.getUsableSpace() / file.getTotalSpace())) * 100) / 100.0;
+        return Math.round((1 - ((double) file.getUsableSpace() / file.getTotalSpace())) * 100)
+            / 100.0;
     }
 
     private int convertByteToGB(long b) {
@@ -42,7 +43,6 @@ public class ResourceManager {
     }
 
     /**
-     *
      * @return System cpu usage (Percentage)
      */
     public int getCpuUsage() {
@@ -50,10 +50,10 @@ public class ResourceManager {
     }
 
     /**
-     *
      * @return System memory usage (Percentage)
      */
     public int getMemoryUsage() {
-        return (int) ((1 - ((double) osBean.getFreePhysicalMemorySize() / osBean.getTotalPhysicalMemorySize()))*100);
+        return (int) ((1 - ((double) osBean.getFreePhysicalMemorySize()
+            / osBean.getTotalPhysicalMemorySize())) * 100);
     }
 }

@@ -19,6 +19,7 @@ import java.util.Optional;
 @Service
 @Transactional
 public class SimHistoryService {
+
     private final SimHistoryRepository simHistoryRepository;
     private final FileService fileService = new FileService();
 
@@ -30,10 +31,9 @@ public class SimHistoryService {
     public Optional<List<MyHistoryDto>> readMyHistory(String user) {
         Optional<List<SimHistory>> simHistories = simHistoryRepository.readByUser(user);
 
-
         List<MyHistoryDto> myHistoryDto = new ArrayList<>();
         long idx = 1;
-        if (simHistories.isPresent()){
+        if (simHistories.isPresent()) {
             for (SimHistory simHistory : simHistories.get()) {
                 myHistoryDto.add(new MyHistoryDto(idx, simHistory));
                 idx++;
@@ -45,6 +45,7 @@ public class SimHistoryService {
 
     @Data
     public static class MyHistoryDto {
+
         private Long key;
         private Long no;
         private String scenario;
@@ -72,9 +73,14 @@ public class SimHistoryService {
         }
     }
 
-    public void downloadMyHistory(String user, String simulator, String scenario, HttpServletResponse response) {
-        user = "USER1"; simulator = "AMHS Sim"; scenario = "Scenario1";
-        String directoryPathToZip = "/Users/js.oh/Desktop/Developers/simportal/history" + "/" + user + "/" + simulator  + "/" + scenario;
+    public void downloadMyHistory(String user, String simulator, String scenario,
+        HttpServletResponse response) {
+        user = "USER1";
+        simulator = "AMHS Sim";
+        scenario = "Scenario1";
+        String directoryPathToZip =
+            "/Users/js.oh/Desktop/Developers/simportal/history" + "/" + user + "/" + simulator + "/"
+                + scenario;
         String downloadFileName = simulator + "+" + scenario + ".zip"; // 다운로드 파일 이름 명시
         String tempDirectoryPath = "/Users/js.oh/Desktop/Developers/simportal/temp/";
 
@@ -82,7 +88,8 @@ public class SimHistoryService {
 
         File file = new File(tempDirectoryPath + downloadFileName);
 
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + downloadFileName + "\";");
+        response.setHeader("Content-Disposition",
+            "attachment; filename=\"" + downloadFileName + "\";");
         response.setHeader("Content-Transfer-Encoding", "binary"); //
         response.setHeader("Content-Type", "application/zip"); // file type
         response.setHeader("Content-Length", "" + file.length()); // 응답의 크기 명시

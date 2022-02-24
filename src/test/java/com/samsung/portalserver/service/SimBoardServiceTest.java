@@ -26,10 +26,12 @@ class SimBoardServiceTest {
     ReservationService reservationService = new ReservationService(null, null);
     FileService fileService = new FileService();
     SimBoardService simBoardService;
+
     @Autowired
     public SimBoardServiceTest(SimBoardService simBoardService) {
         this.simBoardService = simBoardService;
     }
+
     MultipartFile fslFile;
     List<MultipartFile> fssFiles;
 
@@ -41,20 +43,20 @@ class SimBoardServiceTest {
         fssFiles.add(new MockMultipartFile("MOCK_FSS2", "FSS2.fss", null, new byte[10]));
         fssFiles.add(new MockMultipartFile("MOCK_FSS3", "FSS3.fss", null, new byte[10]));
     }
+
     @Test
     void saveScenarioFile() {
-        String saveDirectoryPath = FileService.HISTORY_DIR_PATH
-                + FileService.DIR_DELIMETER + "TESTCODE_USER"
-                + FileService.DIR_DELIMETER + "TESTCODE_SIMULATOR"
-                + FileService.DIR_DELIMETER + "TESTCODE_SCENARIO";
+        String saveDirectoryPath =
+            FileService.HISTORY_DIR_PATH + FileService.DIR_DELIMETER + "TESTCODE_USER"
+                + FileService.DIR_DELIMETER + "TESTCODE_SIMULATOR" + FileService.DIR_DELIMETER
+                + "TESTCODE_SCENARIO";
 
         reservationService.saveScenarioFile(saveDirectoryPath, fslFile, fssFiles);
 
         assertThat(fileService.aleadyExistFileOrDir(saveDirectoryPath)).isEqualTo(true);
 
         fileService.deleteDirectory(
-                FileService.HISTORY_DIR_PATH + FileService.DIR_DELIMETER + "TESTCODE_USER"
-        );
+            FileService.HISTORY_DIR_PATH + FileService.DIR_DELIMETER + "TESTCODE_USER");
     }
 
     @Test
@@ -63,8 +65,9 @@ class SimBoardServiceTest {
     void updateCurrentRep() {
         Optional<SimBoard> simBoard = simBoardService.readUniqueRecord(72);
 
-        if (!simBoard.isPresent())
+        if (!simBoard.isPresent()) {
             throw new IllegalStateException("Test record has been deleted");
+        }
 
         int beforeRep = simBoard.get().getCurrent_rep();
         int afterRep = beforeRep + 1;

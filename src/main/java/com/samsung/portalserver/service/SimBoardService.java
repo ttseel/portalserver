@@ -20,12 +20,13 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @Transactional
 public class SimBoardService {
+
     private final SimBoardRepository simBoardRepository;
     private final SimHistoryRepository simHistoryRepository;
 
     @Autowired
     public SimBoardService(SimBoardRepository simBoardRepository,
-                           SimHistoryRepository simHistoryRepository) {
+        SimHistoryRepository simHistoryRepository) {
         this.simBoardRepository = simBoardRepository;
         this.simHistoryRepository = simHistoryRepository;
     }
@@ -40,7 +41,7 @@ public class SimBoardService {
 
         List<CurrentRunningRecord> currentRunningDto = new ArrayList<>();
         long idx = 1;
-        if (simBoardList.isPresent()){
+        if (simBoardList.isPresent()) {
             for (SimBoard simBoard : simBoardList.get()) {
                 currentRunningDto.add(new CurrentRunningRecord(idx, simBoard));
                 idx++;
@@ -68,10 +69,12 @@ public class SimBoardService {
         return simBoardRepository.readUniqueRecord(user, simulator, scenario);
     }
 
-    public Optional<StatusAndMessageDto> validatePossibleToReserveScenario(String user, String simulator, List<String> scenarioList) {
+    public Optional<StatusAndMessageDto> validatePossibleToReserveScenario(String user,
+        String simulator, List<String> scenarioList) {
         StatusAndMessageDto statusAndMessageDto = new StatusAndMessageDto(true);
 
-        Optional<List<SimBoard>> records = simBoardRepository.readByUserAndSimulator(user, simulator);
+        Optional<List<SimBoard>> records = simBoardRepository.readByUserAndSimulator(user,
+            simulator);
 
         if (records.isPresent() && records.get().size() > 0) {
             Map<String, Boolean> scenarioMap = new ConcurrentHashMap<>();
@@ -79,12 +82,13 @@ public class SimBoardService {
                 scenarioMap.put(simBoard.getScenario(), true);
             }
 
-            StringBuilder validationMessage = new StringBuilder("Some scenarios already exist in the Reserved or History: ");
+            StringBuilder validationMessage = new StringBuilder(
+                "Some scenarios already exist in the Reserved or History: ");
             for (int i = 0; i < scenarioList.size(); i++) {
                 if (scenarioMap.containsKey(scenarioList.get(i))) {
                     statusAndMessageDto.setStatus(false);
                     validationMessage.append(scenarioList.get(i));
-                    if (!isLastScenario(i, scenarioList.size()-1)) {
+                    if (!isLastScenario(i, scenarioList.size() - 1)) {
                         validationMessage.append(", ");
                     }
                 }
@@ -110,7 +114,8 @@ public class SimBoardService {
 
     private boolean alreadyExistInSimHistory(String user, String simulator, String scenario) {
         boolean exist = false;
-        Optional<List<SimHistory>> simHistories = simHistoryRepository.readByUserAndSimulatorAndScenario(user, simulator, scenario);
+        Optional<List<SimHistory>> simHistories = simHistoryRepository.readByUserAndSimulatorAndScenario(
+            user, simulator, scenario);
         if (simHistories.isPresent() && simHistories.get().size() > 0) {
             exist = true;
         }

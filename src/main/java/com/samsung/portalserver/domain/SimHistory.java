@@ -8,10 +8,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "sim_history")
-@Getter @Setter
+@Getter
+@Setter
 public class SimHistory {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "no")
     private Long no;
 

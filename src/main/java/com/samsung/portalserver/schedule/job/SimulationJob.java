@@ -8,7 +8,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter @Setter
+@Getter
+@Setter
 public class SimulationJob implements Job {
 
     private Process process;
@@ -31,7 +32,8 @@ public class SimulationJob implements Job {
     private LocalDateTime end_date;
     private String termination_reason;
 
-    public SimulationJob() {}
+    public SimulationJob() {
+    }
 
     public SimulationJob(SimBoard simBoard) {
         this.simBoardPKNo = simBoard.getNo();

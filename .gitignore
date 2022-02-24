@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Simulation ###
+/src/main/java/com/samsung/portalserver/simulation/

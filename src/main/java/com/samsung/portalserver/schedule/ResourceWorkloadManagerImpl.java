@@ -10,6 +10,7 @@ public class ResourceWorkloadManagerImpl implements WorkloadManager {
     private static final int MAX_RAM_USAGE_THRESHOLD = 90; // %
 
     private static final ResourceManager resourceManager = new ResourceManager();
+
     @Override
     public boolean checkPossibleToWork() {
 //        if(!isEnoughToUseStorage() || !isEnoughToCpuUsage() || !isEnoughToMemoryUsage()) {

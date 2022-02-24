@@ -12,7 +12,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class SimHistoryServiceTest {
-    @Autowired SimHistoryService simHistoryService;
+
+    @Autowired
+    SimHistoryService simHistoryService;
 
     @Test
     void downloadMyHistory() {

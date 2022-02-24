@@ -21,19 +21,24 @@ public class SimBoardApiController {
     private final SimBoardService simBoardService;
 
     @GetMapping("/api/simulation/simboard/current-running")
-    private Optional<List<CurrentRunningRecord>> readCurrentRunning(@RequestParam("user") String user) {
-        Optional<List<CurrentRunningRecord>> currentRunningDto = simBoardService.readCurrentRunning(user.toUpperCase());
+    private Optional<List<CurrentRunningRecord>> readCurrentRunning(
+        @RequestParam("user") String user) {
+
+        Optional<List<CurrentRunningRecord>> currentRunningDto = simBoardService.readCurrentRunning(
+            user.toUpperCase());
 
         return currentRunningDto;
     }
 
     @GetMapping("/api/simulation/simboard/reserved-scenario")
     private Optional<List<ReservedScenarioRecord>> readReserved(@RequestParam("user") String user) {
-        Optional<List<SimBoard>> simBoardList = simBoardService.readByUserAndStatus(user.toUpperCase());
+
+        Optional<List<SimBoard>> simBoardList = simBoardService.readByUserAndStatus(
+            user.toUpperCase());
 
         List<ReservedScenarioRecord> reservedScenarioDto = new ArrayList<>();
         long idx = 1;
-        if (simBoardList.isPresent()){
+        if (simBoardList.isPresent()) {
             for (SimBoard simBoard : simBoardList.get()) {
                 reservedScenarioDto.add(new ReservedScenarioRecord(idx, simBoard));
                 idx++;

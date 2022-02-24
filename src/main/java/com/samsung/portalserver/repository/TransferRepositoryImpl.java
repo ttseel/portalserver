@@ -10,6 +10,7 @@ import java.util.Optional;
 
 @Repository
 public class TransferRepositoryImpl implements TransferRepository {
+
     private final EntityManager em;
 
     @Autowired
@@ -19,10 +20,10 @@ public class TransferRepositoryImpl implements TransferRepository {
 
     @Override
     public Optional<List<TransferSummary>> readSummaryBySiteAndYyyymm(String site, String yyyymm) {
-        List<TransferSummary> result = em.createQuery("select ts from TransferSummary as ts where ts.site = :site and ts.yyyymmdd like concat(:yyyymm, '%')", TransferSummary.class)
-                .setParameter("site", site)
-                .setParameter("yyyymm", yyyymm)
-                .getResultList();
+        List<TransferSummary> result = em.createQuery(
+                "select ts from TransferSummary as ts where ts.site = :site and ts.yyyymmdd like concat(:yyyymm, '%')",
+                TransferSummary.class).setParameter("site", site).setParameter("yyyymm", yyyymm)
+            .getResultList();
 
         return Optional.ofNullable(result);
     }

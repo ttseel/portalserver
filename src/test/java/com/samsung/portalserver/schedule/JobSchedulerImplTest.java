@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 
 @SpringBootTest
 class JobSchedulerImplTest {
+
     FileService fileService = new FileService();
     //    JobSchedulerImpl jobScheduler = new JobSchedulerImpl();
     @Autowired
@@ -41,15 +42,18 @@ class JobSchedulerImplTest {
 
         try {
 //            Process p = rt.exec("jps -l");
-            Process p = rt.exec("java -jar " + FileService.SIMULATOR_DIR_PATH + FileService.DIR_DELIMETER + "mocksim.jar");
+            Process p = rt.exec(
+                "java -jar " + FileService.SIMULATOR_DIR_PATH + FileService.DIR_DELIMETER
+                    + "mocksim.jar");
 
             InputStream is = p.getInputStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
             while (true) {
                 String s = br.readLine();
-                if (s==null)
+                if (s == null) {
                     break;
+                }
                 System.out.println(s);
             }
 

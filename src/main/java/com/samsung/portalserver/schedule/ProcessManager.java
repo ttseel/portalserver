@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ProcessManager {
+
     public static long findProcessIdByInstance(Process p) {
         long pid = -1;
 
@@ -22,8 +23,8 @@ public class ProcessManager {
                 f.setAccessible(true);
                 pid = f.getLong(p);
                 f.setAccessible(false);
-            } else if (p.getClass().getName().equals("java.lang.Win32Process") ||
-                    p.getClass().getName().equals("java.lang.ProcessImpl")) {
+            } else if (p.getClass().getName().equals("java.lang.Win32Process") || p.getClass()
+                .getName().equals("java.lang.ProcessImpl")) {
                 Field f = p.getClass().getDeclaredField("handle");
                 f.setAccessible(true);
                 long handl = f.getLong(p);
@@ -51,8 +52,9 @@ public class ProcessManager {
 
             while (true) {
                 String processInfo = br.readLine();
-                if (processInfo==null)
+                if (processInfo == null) {
                     break;
+                }
 
                 String[] splited = processInfo.split(" ");
                 Integer pid = Integer.parseInt(splited[0]);

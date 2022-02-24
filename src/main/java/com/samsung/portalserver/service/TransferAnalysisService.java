@@ -23,10 +23,11 @@ public class TransferAnalysisService {
     private static final String KEY_DELIMETER = ":";
 
     public Optional<FromToMatrix> readFromToMatrixBy(String site, String year, String month) {
-        Optional<List<TransferSummary>> result = transferRepository.readSummaryBySiteAndYyyymm(site, year+month);
+        Optional<List<TransferSummary>> result = transferRepository.readSummaryBySiteAndYyyymm(site,
+            year + month);
 
         Optional<FromToMatrix> fromToMatrix = Optional.empty();
-        if(result.isPresent()){
+        if (result.isPresent()) {
             fromToMatrix = convertToFromToMatrix(result);
         }
 
@@ -40,18 +41,18 @@ public class TransferAnalysisService {
         return Optional.empty();
     }
 
-    private Map<String, List<Map<String, Integer>>> createRows(Optional<List<TransferSummary>> result, Map<String, Map<String, Boolean>> header) {
+    private Map<String, List<Map<String, Integer>>> createRows(
+        Optional<List<TransferSummary>> result, Map<String, Map<String, Boolean>> header) {
         Map<String, List<Map<String, Integer>>> rowsByLine = new ConcurrentHashMap<>();
 
         result.get().forEach(transferSummary -> {
-            if(!rowsByLine.containsKey(transferSummary.getLine())) {
+            if (!rowsByLine.containsKey(transferSummary.getLine())) {
                 List<Map<String, Integer>> rows = new ArrayList<>();
             }
 
             Map<String, String> eachRow = new ConcurrentHashMap<>();
             eachRow.put("FROM_TYPE", transferSummary.getFrom_type());
 //            eachRow.put(transferSummary.getTo_type(), transferSummary.)
-
 
             header.keySet().forEach(column -> {
 
@@ -68,7 +69,7 @@ public class TransferAnalysisService {
         result.ifPresent(transferSummaries -> {
             transferSummaries.forEach(transferSummary -> {
                 String headerKey = makeKey(transferSummary.getLine(), transferSummary.getTo_type());
-                if (!header.containsKey(headerKey)){
+                if (!header.containsKey(headerKey)) {
                     header.put(headerKey, true);
                 }
             });
@@ -76,10 +77,10 @@ public class TransferAnalysisService {
         return header;
     }
 
-    private String makeKey(String ...inputs) {
+    private String makeKey(String... inputs) {
         String res = "";
-        for (String input : inputs){
-            if (res.equals("")){
+        for (String input : inputs) {
+            if (res.equals("")) {
                 res += input;
             } else {
                 res += KEY_DELIMETER + input;
@@ -90,11 +91,13 @@ public class TransferAnalysisService {
 
     @Getter
     public static class FromToMatrix {
+
         private static final String KEY_DELIMETER = TransferAnalysisService.KEY_DELIMETER;
         private Map<String, Boolean> header;
         private Map<String, Integer> rows;
 
-        public FromToMatrix() {}
+        public FromToMatrix() {
+        }
 
         public FromToMatrix(Map<String, Boolean> header, Map<String, Integer> rows) {
             this.header = header;

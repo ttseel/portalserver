@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class PortalserverApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(PortalserverApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(PortalserverApplication.class, args);
+    }
 }

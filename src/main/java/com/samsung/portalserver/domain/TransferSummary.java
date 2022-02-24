@@ -7,10 +7,12 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "transfer_summary")
-@Getter @Setter
+@Getter
+@Setter
 public class TransferSummary {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "no")
     private Long no;
 

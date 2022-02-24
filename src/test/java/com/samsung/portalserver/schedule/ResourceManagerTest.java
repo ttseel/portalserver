@@ -3,6 +3,7 @@ package com.samsung.portalserver.schedule;
 import org.junit.jupiter.api.Test;
 
 class ResourceManagerTest {
+
     ResourceManager rm = new ResourceManager();
 
     @Test

@@ -16,6 +16,7 @@ import java.util.zip.ZipOutputStream;
 
 
 public class FileService {
+
     public static final String EXTENSION_TXT = ".txt";
     public static final String EXTENSION_FSS = ".fsl";
     public static final String EXTENSION_FSL = ".fss";
@@ -32,7 +33,7 @@ public class FileService {
         File resultZip = new File("/Users/js.oh/Desktop/result.zip");
         byte[] buf = new byte[4096];
 
-        try(ZipOutputStream out = new ZipOutputStream(new FileOutputStream(resultZip))) {
+        try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(resultZip))) {
             for (String path : filePathIncludeNameAndExtention) {
                 File file = new File(path);
 
@@ -53,15 +54,16 @@ public class FileService {
         }
     }
 
-    public void setFileIntoResponse(String filePath, String fileNameIncludeExtention, HttpServletResponse response) {
-        try(FileInputStream fis = new FileInputStream(filePath+fileNameIncludeExtention);
-            OutputStream out = response.getOutputStream();) {
+    public void setFileIntoResponse(String filePath, String fileNameIncludeExtention,
+        HttpServletResponse response) {
+        try (FileInputStream fis = new FileInputStream(
+            filePath + fileNameIncludeExtention); OutputStream out = response.getOutputStream();) {
             int readCount = 0;
             byte[] buffer = new byte[1024];
-            while((readCount = fis.read(buffer)) != -1){
-                out.write(buffer,0,readCount); // response.getOutputStream()에 전송할 file 입력
+            while ((readCount = fis.read(buffer)) != -1) {
+                out.write(buffer, 0, readCount); // response.getOutputStream()에 전송할 file 입력
             }
-        }catch(Exception ex){
+        } catch (Exception ex) {
             throw new RuntimeException("file Save Error");
         }
     }
@@ -72,8 +74,8 @@ public class FileService {
 
         if (dir.length() > 0) {
             fileList = (ArrayList<String>) Arrays.stream(Objects.requireNonNull(dir.list()))
-                    .filter(file -> file.charAt(0) != '.') // .DS_Store 같은 시스템이 생성하는 파일 제외
-                    .collect(Collectors.toList());
+                .filter(file -> file.charAt(0) != '.') // .DS_Store 같은 시스템이 생성하는 파일 제외
+                .collect(Collectors.toList());
         }
         return fileList;
     }
@@ -83,7 +85,8 @@ public class FileService {
         return file.exists();
     }
 
-    public void saveMultipartFileToLocal(String directoryPath, MultipartFile fslFile, List<MultipartFile> fssFiles) {
+    public void saveMultipartFileToLocal(String directoryPath, MultipartFile fslFile,
+        List<MultipartFile> fssFiles) {
         try {
             File fsl = new File(directoryPath + DIR_DELIMETER + fslFile.getOriginalFilename());
             fslFile.transferTo(fsl);
@@ -107,7 +110,7 @@ public class FileService {
 
     public void deleteFile(String filePath, String fileNameIncludeExtention) {
         try {
-            Path path = Paths.get(filePath+fileNameIncludeExtention);
+            Path path = Paths.get(filePath + fileNameIncludeExtention);
             Files.delete(path);
         } catch (Exception e) {
             e.printStackTrace();
