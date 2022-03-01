@@ -1,16 +1,14 @@
 package com.samsung.portalserver.repository;
 
 import com.samsung.portalserver.domain.SimBoard;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.ParameterMode;
-import javax.persistence.StoredProcedureQuery;
-import java.io.File;
+import com.samsung.portalserver.schedule.job.NewSimulationJobDto;
 import java.util.List;
 import java.util.Optional;
+import javax.persistence.EntityManager;
+import javax.persistence.ParameterMode;
+import javax.persistence.StoredProcedureQuery;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public class SimBoardRepositoryImpl implements SimBoardRepository {
@@ -103,15 +101,32 @@ public class SimBoardRepositoryImpl implements SimBoardRepository {
     }
 
     @Override
-    public long findNewSim(int executionServer) {
+    public NewSimulationJobDto findNewSim(int executionServer) {
         StoredProcedureQuery query = em.createStoredProcedureQuery("HYPPEOPLE.usp_find_new_sim");
         query.registerStoredProcedureParameter("execution_server", Integer.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("sim_no", Long.class, ParameterMode.OUT);
+        query.registerStoredProcedureParameter("o_fsl_name", String.class, ParameterMode.OUT);
+        query.registerStoredProcedureParameter("o_user", String.class, ParameterMode.OUT);
+        query.registerStoredProcedureParameter("o_simulator", String.class, ParameterMode.OUT);
         query.setParameter("execution_server", executionServer);
-        boolean queryResult = query.execute();
-        Long result = (Long) query.getOutputParameterValue("sim_no");
 
-        return result;
+        boolean queryResult = query.execute();
+
+        NewSimulationJobDto jobDto = new NewSimulationJobDto();
+        jobDto.setFslName((String) query.getOutputParameterValue("o_fsl_name"));
+        jobDto.setUser((String) query.getOutputParameterValue("o_user"));
+        jobDto.setSimulator((String) query.getOutputParameterValue("o_simulator"));
+
+        return jobDto;
+    }
+
+    @Override
+    public Optional<List<SimBoard>> readUniqueFsl(String fslName, String user, String simulator) {
+        List<SimBoard> queryResult = em.createQuery(
+                "select sb from SimBoard as sb where sb.fsl_name = :fslName and sb.user = :user and sb.simulator = :simulator")
+            .setParameter("fslName", fslName).setParameter("user", user)
+            .setParameter("simulator", simulator).getResultList();
+
+        return Optional.ofNullable(queryResult);
     }
 
     @Override

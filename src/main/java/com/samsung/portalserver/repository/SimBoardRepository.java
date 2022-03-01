@@ -2,6 +2,7 @@ package com.samsung.portalserver.repository;
 
 import com.samsung.portalserver.domain.SimBoard;
 
+import com.samsung.portalserver.schedule.job.NewSimulationJobDto;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +24,9 @@ public interface SimBoardRepository {
 
     void save(SimBoard simBoard);
 
-    long findNewSim(int executionServer);
+    NewSimulationJobDto findNewSim(int executionServer);
 
     void commit();
+
+    Optional<List<SimBoard>> readUniqueFsl(String fslName, String user, String simulator);
 }

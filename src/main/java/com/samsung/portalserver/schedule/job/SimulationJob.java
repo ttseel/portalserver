@@ -1,21 +1,16 @@
 package com.samsung.portalserver.schedule.job;
 
 import com.samsung.portalserver.domain.SimBoard;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 @Setter
-public class SimulationJob implements Job {
+public class SimulationJob {
 
-    private Process process;
-    private String configDirPath = "";
-    private String fslFilePath = "";
-    private List<String> fssFilePath = new ArrayList<>();
+    private String fssFilePath;
+    private String trGenFilePath;
     private Long simBoardPKNo;
     private String fslName;
     private String scenario;
@@ -25,15 +20,8 @@ public class SimulationJob implements Job {
     private Integer current_rep;
     private Integer request_rep;
     private String status;
-    private Integer reservation_server;
-    private Integer execution_server;
-    private LocalDateTime reservation_date;
-    private LocalDateTime start_date;
     private LocalDateTime end_date;
     private String termination_reason;
-
-    public SimulationJob() {
-    }
 
     public SimulationJob(SimBoard simBoard) {
         this.simBoardPKNo = simBoard.getNo();
@@ -45,9 +33,5 @@ public class SimulationJob implements Job {
         this.current_rep = simBoard.getCurrent_rep();
         this.request_rep = simBoard.getRequest_rep();
         this.status = simBoard.getStatus();
-        this.reservation_server = simBoard.getReservation_server();
-        this.execution_server = simBoard.getExecution_server();
-        this.reservation_date = simBoard.getReservation_date();
-        this.start_date = simBoard.getStart_date();
     }
 }

@@ -7,6 +7,7 @@ import com.samsung.portalserver.domain.SimHistory;
 import com.samsung.portalserver.repository.SimBoardRepository;
 import com.samsung.portalserver.repository.SimBoardStatus;
 import com.samsung.portalserver.repository.SimHistoryRepository;
+import com.samsung.portalserver.schedule.job.NewSimulationJobDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,6 +70,10 @@ public class SimBoardService {
         return simBoardRepository.readUniqueRecord(user, simulator, scenario);
     }
 
+    public Optional<List<SimBoard>> readUniqueFsl(String fslName, String user, String simulator) {
+        return simBoardRepository.readUniqueFsl(fslName, user, simulator);
+    }
+
     public Optional<StatusAndMessageDto> validatePossibleToReserveScenario(String user,
         String simulator, List<String> scenarioList) {
         StatusAndMessageDto statusAndMessageDto = new StatusAndMessageDto(true);
@@ -122,7 +127,7 @@ public class SimBoardService {
         return exist;
     }
 
-    public long findNewSimulation(int executionServer) {
+    public NewSimulationJobDto findNewSimulation(int executionServer) {
         return simBoardRepository.findNewSim(executionServer);
     }
 

@@ -7,6 +7,7 @@ import java.util.List;
 
 @Data
 public class NewReservationDto {
+
     private String user;
     private String simulator;
     private String version;
