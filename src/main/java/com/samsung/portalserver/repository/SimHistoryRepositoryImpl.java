@@ -2,15 +2,14 @@ package com.samsung.portalserver.repository;
 
 import com.samsung.portalserver.domain.SimHistory;
 import com.samsung.portalserver.schedule.job.SimulationJob;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
-import javax.persistence.EntityManager;
-import javax.persistence.ParameterMode;
-import javax.persistence.StoredProcedureQuery;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import javax.persistence.EntityManager;
+import javax.persistence.ParameterMode;
+import javax.persistence.StoredProcedureQuery;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public class SimHistoryRepositoryImpl implements SimHistoryRepository {

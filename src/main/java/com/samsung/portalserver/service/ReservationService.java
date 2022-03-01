@@ -42,7 +42,7 @@ public class ReservationService {
             simBoard.setSimulator(newReservationDto.getSimulator());
             simBoard.setVersion(newReservationDto.getVersion());
             simBoard.setUser(newReservationDto.getUser());
-            simBoard.setCurrent_rep(1);
+            simBoard.setCurrent_rep(0);
             simBoard.setRequest_rep(99); //scenario config 파일에서 파싱
             simBoard.setStatus(SimBoardStatus.RESERVED.name());
             simBoard.setReservation_server(JobSchedulerImpl.CURRENT_SERVER_TEMP);

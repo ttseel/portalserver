@@ -1,12 +1,10 @@
 package com.samsung.portalserver.domain;
 
-import lombok.Getter;
-
 public enum SimulatorCategory {
     ALL, AMHS_SIM, MCPSIM, OCS3SIM, OCS4SIM, SeeFlow, REMOTE_SIM, NOT_FOUND;
 
     public static SimulatorCategory getCategoryByString(String simulator) {
-        SimulatorCategory category = NOT_FOUND;
+        SimulatorCategory category;
         switch (simulator.toUpperCase()) {
             case "ALL":
                 category = ALL;

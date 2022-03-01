@@ -3,18 +3,17 @@ package com.samsung.portalserver.service;
 import com.samsung.portalserver.domain.SimHistory;
 import com.samsung.portalserver.repository.SimHistoryRepository;
 import com.samsung.portalserver.schedule.job.SimulationJob;
-import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.zeroturnaround.zip.ZipUtil;
-
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import javax.servlet.http.HttpServletResponse;
+import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.zeroturnaround.zip.ZipUtil;
 
 @Service
 @Transactional

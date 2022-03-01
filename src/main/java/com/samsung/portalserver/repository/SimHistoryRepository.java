@@ -1,10 +1,7 @@
 package com.samsung.portalserver.repository;
 
-import com.samsung.portalserver.domain.SimBoard;
 import com.samsung.portalserver.domain.SimHistory;
 import com.samsung.portalserver.schedule.job.SimulationJob;
-
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 

@@ -24,6 +24,8 @@ public class SimulationJob {
     private String termination_reason;
 
     public SimulationJob(SimBoard simBoard) {
+        this.fssFilePath = "";
+        this.trGenFilePath = "";
         this.simBoardPKNo = simBoard.getNo();
         this.fslName = simBoard.getFsl_name();
         this.scenario = simBoard.getScenario();
@@ -33,5 +35,7 @@ public class SimulationJob {
         this.current_rep = simBoard.getCurrent_rep();
         this.request_rep = simBoard.getRequest_rep();
         this.status = simBoard.getStatus();
+        this.end_date = LocalDateTime.MAX;
+        termination_reason = "";
     }
 }

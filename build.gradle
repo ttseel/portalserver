@@ -1,7 +1,7 @@
 plugins {
-	id 'org.springframework.boot' version '2.6.1'
-	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-	id 'java'
+    id 'org.springframework.boot' version '2.6.1'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
 }
 
 group = 'com.samsung'
@@ -9,30 +9,34 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.jetbrains:annotations:20.1.0'
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.jetbrains:annotations:20.1.0'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-	// .zip으로 만들어주는 ZipUtil 라이브러리: https://mvnrepository.com/artifact/org.zeroturnaround/zt-zip
-	implementation group: 'org.zeroturnaround', name: 'zt-zip', version: '1.13'
-	// Directory를 쉽게 제거하는 메소드 제공 라이브러리: https://mvnrepository.com/artifact/commons-io/commons-io
-	implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
-	// jna(java native access) 라이브러리. pid를 구하는 과정에서 사용: https://search.maven.org/artifact/net.java.dev.jna/jna-platform/5.10.0/jar
-	implementation group: 'net.java.dev.jna', name: 'jna-platform', version: '5.10.0'
+    // zt-zip: .zip으로 만들어주는 ZipUtil 라이브러리: https://mvnrepository.com/artifact/org.zeroturnaround/zt-zip
+    implementation group: 'org.zeroturnaround', name: 'zt-zip', version: '1.13'
+    // common-io: Directory를 쉽게 제거하는 메소드 제공 라이브러리: https://mvnrepository.com/artifact/commons-io/commons-io
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+    // jna(java native access): pid를 구하는 과정에서 사용: https://search.maven.org/artifact/net.java.dev.jna/jna-platform/5.10.0/jar
+    implementation group: 'net.java.dev.jna', name: 'jna-platform', version: '5.10.0'
+    // jdom2; xml 파싱 라이브러리
+    implementation group: 'org.jdom', name: 'jdom2', version: '2.0.6'
+    // opencsv: csv, tsv 등의 파일을 쉽게 read/write https://mvnrepository.com/artifact/com.opencsv/opencsv
+    implementation group: 'com.opencsv', name: 'opencsv', version: '5.6'
 
-	implementation 'commons-io:commons-io:2.6'
-	implementation 'mysql:mysql-connector-java'
+    implementation 'commons-io:commons-io:2.6'
+    implementation 'mysql:mysql-connector-java'
 }
 
 test {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
