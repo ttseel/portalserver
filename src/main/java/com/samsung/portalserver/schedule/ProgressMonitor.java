@@ -1,10 +1,9 @@
 package com.samsung.portalserver.schedule;
 
+import com.samsung.portalserver.common.Subscribable;
 import com.samsung.portalserver.schedule.job.Job;
 
-import java.util.Observable;
-
-public abstract class ProgressMonitor extends Observable {
+public interface ProgressMonitor extends Subscribable {
 
     public abstract void addNewJob(Job job);
 
@@ -13,5 +12,4 @@ public abstract class ProgressMonitor extends Observable {
     public abstract int count();
 
     public abstract void monitoringProgress();
-
 }

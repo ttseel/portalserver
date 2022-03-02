@@ -2,7 +2,7 @@ package com.samsung.portalserver.schedule;
 
 import com.samsung.portalserver.schedule.job.Job;
 import com.samsung.portalserver.schedule.job.SimulationJob;
-import com.samsung.portalserver.schedule.job.SimulationListJob;
+import com.samsung.portalserver.schedule.job.SimulationJobList;
 import com.samsung.portalserver.service.FileService;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,17 +20,17 @@ import org.jdom2.output.XMLOutputter;
 public class McpsimConfigBuilder implements ConfigBuilder {
 
     private FileService fileService = new FileService();
-    SimulationListJob simulationListJob;
+    SimulationJobList simulationJobList;
 
     public void build(Job job) throws IOException, JDOMException {
-        simulationListJob = (SimulationListJob) job;
+        simulationJobList = (SimulationJobList) job;
 
         try {
             // Modify Path Element of fsl
             modifyPathElementOfFsl();
 
             // Modify fss
-            for (SimulationJob simulationJob : simulationListJob.getSimulationMap().values()) {
+            for (SimulationJob simulationJob : simulationJobList.getSimulationMap().values()) {
                 String fssPath = simulationJob.getFssFilePath();
 
                 // Modify Path Element of fss
@@ -88,18 +88,18 @@ public class McpsimConfigBuilder implements ConfigBuilder {
     }
 
     private void modifyPathElementOfFsl() throws IOException, JDOMException {
-        Document fslXml = new SAXBuilder().build(new File(simulationListJob.getFslFilePath()));
+        Document fslXml = new SAXBuilder().build(new File(simulationJobList.getFslFilePath()));
 
         Element scenarioLists = fslXml.getRootElement();
         scenarioLists.removeChildren("xml-list", scenarioLists.getNamespace());
 
-        simulationListJob.getSimulationMap().values().forEach(SimulationJob -> {
+        simulationJobList.getSimulationMap().values().forEach(SimulationJob -> {
             Element e = new Element("xml-list", scenarioLists.getNamespace());
             e.setText(SimulationJob.getFssFilePath());
             scenarioLists.addContent(e);
         });
 
-        saveXml(fslXml, simulationListJob.getFslFilePath());
+        saveXml(fslXml, simulationJobList.getFslFilePath());
     }
 
     private void modifyPathElementOfFss(String fssPath) throws IOException, JDOMException {
@@ -146,7 +146,7 @@ public class McpsimConfigBuilder implements ConfigBuilder {
         String trGenConfigFileName = splited[splited.length - 1];
 
         ohtc.getChild("tr-gen-config-path").setText(
-            simulationListJob.getConfigDirPath() + FileService.DIR_DELIMETER + trGenConfigFileName);
+            simulationJobList.getConfigDirPath() + FileService.DIR_DELIMETER + trGenConfigFileName);
     }
 
     private void setXmlFormat(XMLOutputter outputter) {

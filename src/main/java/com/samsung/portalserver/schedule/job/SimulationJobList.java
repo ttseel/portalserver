@@ -1,16 +1,15 @@
 package com.samsung.portalserver.schedule.job;
 
 import com.samsung.portalserver.domain.SimBoard;
+import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 @Setter
-public class SimulationListJob implements Job {
+public class SimulationJobList implements Job {
 
     private Process process;
     private String configDirPath;
@@ -23,12 +22,12 @@ public class SimulationListJob implements Job {
     private Integer execution_server;
     private LocalDateTime reservation_date;
     private LocalDateTime start_date;
-    private List<SimulationJob> simulationList;
+    private Map<String, SimulationJob> simulationMap;
 
-    public SimulationListJob() {
+    public SimulationJobList() {
     }
 
-    public SimulationListJob(SimBoard simBoard) {
+    public SimulationJobList(SimBoard simBoard) {
         this.fslName = simBoard.getFsl_name();
         this.simulator = simBoard.getSimulator();
         this.version = simBoard.getVersion();
@@ -37,6 +36,6 @@ public class SimulationListJob implements Job {
         this.execution_server = simBoard.getExecution_server();
         this.reservation_date = simBoard.getReservation_date();
         this.start_date = simBoard.getStart_date();
-        simulationList = new ArrayList<>();
+        simulationMap = new ConcurrentHashMap<>();
     }
 }

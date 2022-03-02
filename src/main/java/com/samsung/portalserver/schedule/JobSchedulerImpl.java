@@ -1,30 +1,29 @@
 package com.samsung.portalserver.schedule;
 
+import com.samsung.portalserver.common.Subscribable;
+import com.samsung.portalserver.common.Subscriber;
 import com.samsung.portalserver.domain.SimBoard;
 import com.samsung.portalserver.domain.SimulatorCategory;
 import com.samsung.portalserver.repository.SimBoardStatus;
 import com.samsung.portalserver.schedule.job.Job;
 import com.samsung.portalserver.schedule.job.NewSimulationJobDto;
 import com.samsung.portalserver.schedule.job.SimulationJob;
-import com.samsung.portalserver.schedule.job.SimulationListJob;
+import com.samsung.portalserver.schedule.job.SimulationJobList;
 import com.samsung.portalserver.service.FileService;
 import com.samsung.portalserver.service.SimBoardService;
 import com.samsung.portalserver.service.SimHistoryService;
-import org.jdom2.Element;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import org.jdom2.JDOMException;
-import org.jdom2.output.Format;
-import org.jdom2.output.Format.TextMode;
-import org.jdom2.output.LineSeparator;
-import org.jdom2.output.XMLOutputter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.util.*;
-
 @Component
-public class JobSchedulerImpl implements JobScheduler, Observer {
+public class JobSchedulerImpl implements JobScheduler, Subscriber {
 
     public static final Integer CURRENT_SERVER_TEMP = 99;
 
@@ -34,9 +33,14 @@ public class JobSchedulerImpl implements JobScheduler, Observer {
     private SimHistoryService simHistoryService;
     @Autowired
     private WorkloadManager workloadManager;
-    @Autowired
     private ProgressMonitor progressMonitor;
     private FileService fileService = new FileService();
+
+    @Autowired
+    public JobSchedulerImpl(ProgressMonitor progressMonitor) {
+        this.progressMonitor = progressMonitor;
+        this.progressMonitor.addSubscriber(this);
+    }
 
     /**
      * Try scheduling every T seconds
@@ -52,24 +56,25 @@ public class JobSchedulerImpl implements JobScheduler, Observer {
                 Optional<List<SimBoard>> newJobs = findNewJob();
 
                 if (newJobs.isPresent()) {
-                    SimulationListJob simulationListJob = new SimulationListJob(
+                    SimulationJobList simulationJobList = new SimulationJobList(
                         newJobs.get().get(0));
                     newJobs.get().forEach(simBoard -> {
-                        simulationListJob.getSimulationList().add(new SimulationJob(simBoard));
+                        simulationJobList.getSimulationMap()
+                            .put(simBoard.getScenario(), new SimulationJob(simBoard));
                     });
 
                     // try scheduling
-                    prepare(simulationListJob);
-                    executeJob(simulationListJob);
-                    this.progressMonitor.addNewJob(simulationListJob);
+                    prepare(simulationJobList);
+//                    executeJob(simulationJobList);
+                    this.progressMonitor.addNewJob(simulationJobList);
                 } else {
                     System.out.println("SIM_BOARD does not have RESERVED Job");
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            simBoardService.updateStatus(Long.valueOf(e.getCause().getMessage()),
-                SimBoardStatus.ERROR.name());
+//            e.printStackTrace();
+//            simBoardService.updateStatus(Long.valueOf(e.getCause().getMessage()),
+//                SimBoardStatus.ERROR.name());
         }
     }
 
@@ -117,13 +122,13 @@ public class JobSchedulerImpl implements JobScheduler, Observer {
 
     @Override
     public void prepare(Job job) {
-        SimulationListJob simulationListJob = (SimulationListJob) job;
+        SimulationJobList simulationJobList = (SimulationJobList) job;
         Optional<ConfigBuilder> configBuilder = setConfigBuilder(
-            SimulatorCategory.getCategoryByString(simulationListJob.getSimulator()));
+            SimulatorCategory.getCategoryByString(simulationJobList.getSimulator()));
         try {
             if (configBuilder.isPresent()) {
-                prepareScenarioConfigFiles(simulationListJob);
-                configBuilder.get().build(simulationListJob);
+                prepareScenarioConfigFiles(simulationJobList);
+                configBuilder.get().build(simulationJobList);
             }
         } catch (Exception e) {
             // prepare 과정에서 문제가 발생하면 SIM_BOARD status를 ERROR로 변경
@@ -141,36 +146,36 @@ public class JobSchedulerImpl implements JobScheduler, Observer {
         }
     }
 
-    public void prepareScenarioConfigFiles(SimulationListJob simulationListJob)
+    public void prepareScenarioConfigFiles(SimulationJobList simulationJobList)
         throws IOException, JDOMException {
 
         // Set scenario config path
         String configPath =
-            FileService.HISTORY_DIR_PATH + FileService.DIR_DELIMETER + simulationListJob.getUser()
-                + FileService.DIR_DELIMETER + simulationListJob.getSimulator()
-                + FileService.DIR_DELIMETER + simulationListJob.getFslName()
+            FileService.HISTORY_DIR_PATH + FileService.DIR_DELIMETER + simulationJobList.getUser()
+                + FileService.DIR_DELIMETER + simulationJobList.getSimulator()
+                + FileService.DIR_DELIMETER + simulationJobList.getFslName()
                 + FileService.DIR_DELIMETER + FileService.CONFIG_DIR_NAME;
-        simulationListJob.setConfigDirPath(configPath);
+        simulationJobList.setConfigDirPath(configPath);
 
-        if (!existInCurrentServer(simulationListJob)) {
+        if (!existInCurrentServer(simulationJobList)) {
             // 현재 서버에 없다면 다른 서버에 요청(요청 받는 서버에서 삭제까지 수행)
             System.out.println(
                 String.format("Current Server(no: %d) does not have a Scenario config files.",
                     CURRENT_SERVER_TEMP));
             System.out.println(String.format("Request config files from Server: %d",
-                simulationListJob.getExecution_server()));
-//            requestSimConfigFiles(simulationJob);
-//            moveToConfigDirectory(simulationJob);
+                simulationJobList.getExecution_server()));
+            requestSimConfigFiles(simulationJobList);
+            moveToConfigDirectory(simulationJobList);
         }
-        setFilePathIntoJob(simulationListJob);
+        setFilePathIntoJob(simulationJobList);
     }
 
 
-    private boolean existInCurrentServer(SimulationListJob job) {
+    private boolean existInCurrentServer(SimulationJobList job) {
         return Objects.equals(job.getReservation_server(), CURRENT_SERVER_TEMP);
     }
 
-    private void setFilePathIntoJob(SimulationListJob job) {
+    private void setFilePathIntoJob(SimulationJobList job) {
         List<String> fileNameList = fileService.getFileList(job.getConfigDirPath());
         fileNameList.forEach(fileName -> {
             String[] splited = fileName.split("\\.");
@@ -178,53 +183,30 @@ public class JobSchedulerImpl implements JobScheduler, Observer {
             if (extension.equals("fsl")) {
                 job.setFslFilePath(job.getConfigDirPath() + FileService.DIR_DELIMETER + fileName);
             } else if (extension.equals("fss")) {
-                for (SimulationJob simulationJob : job.getSimulationList()) {
-                    if (simulationJob.getScenario().equals(splited[0])) {
-                        simulationJob.setFssFilePath(
-                            job.getConfigDirPath() + FileService.DIR_DELIMETER + fileName);
-                    }
-                }
+                job.getSimulationMap().get(splited[0])
+                    .setFssFilePath(job.getConfigDirPath() + FileService.DIR_DELIMETER + fileName);
             }
         });
     }
 
-    void modifyPathOfOhtcElement(Element ohtc) {
-        try {
-            ohtc.getChild("cfg-path").setText("cfg-path");
-            ohtc.getChild("input-path").setText("input-path");
-            ohtc.getChild("history-path").setText("history-path");
-            ohtc.getChild("tr-gen-config-path").setText("tr-gen-config-path");
-        } catch (Exception e) {
-            throw new IllegalStateException("modify path element of fss file has been failed");
-        }
-    }
-
-    private void setXmlFormat(XMLOutputter outputter) {
-        Format format = outputter.getFormat();
-        format.setIndent("\t");
-        format.setLineSeparator(LineSeparator.DEFAULT);
-        format.setTextMode(TextMode.NORMALIZE);
-        outputter.setFormat(format);
-    }
-
-    private void requestSimConfigFiles(SimulationListJob job) {
+    private void requestSimConfigFiles(SimulationJobList job) {
 
     }
 
-    private void moveToConfigDirectory(SimulationListJob job) {
+    private void moveToConfigDirectory(SimulationJobList job) {
         fileService.createDirectories(job.getConfigDirPath());
 //        job.setConfigDirPath();
     }
 
     @Override
     public void executeJob(Job job) throws IOException {
-        SimulationListJob simulationListJob = (SimulationListJob) job;
+        SimulationJobList simulationJobList = (SimulationJobList) job;
 
-        Optional<Process> process = SimulationProcessFactory(simulationListJob);
-        process.ifPresent(p -> simulationListJob.setProcess(p));
+        Optional<Process> process = SimulationProcessFactory(simulationJobList);
+        process.ifPresent(p -> simulationJobList.setProcess(p));
     }
 
-    private Optional<Process> SimulationProcessFactory(SimulationListJob job) throws IOException {
+    private Optional<Process> SimulationProcessFactory(SimulationJobList job) throws IOException {
         // 팩토리 메서드 패턴으로 수정하기 !!
         Runtime rt = Runtime.getRuntime();
         Process process = null;
@@ -266,22 +248,30 @@ public class JobSchedulerImpl implements JobScheduler, Observer {
     }
 
     @Override
-    public void update(Observable o, Object arg) {
-        List<SimulationListJob> statusChangedJobs = (List<SimulationListJob>) arg;
-        for (SimulationListJob job : statusChangedJobs) {
-            if (isFslTerminated(job)) {
-                // procedure: delete record from SIM_BOARD, add record to SIM_HISTORY
-                simHistoryService.moveFromBoardToHistory(job);
-                // remove job from progress monitor
-                progressMonitor.removeJob(job);
-            } else {
-                // update SIM_BOARD: current_rep
-//                simBoardService.updateCurrentRep(job.getSimBoardPKNo(), job.getCurrent_rep());
+    public void update(Subscribable s, Object arg) {
+        System.out.println("update update update update update update update update ");
+        Map<SimulationJobList, List<SimulationJob>> statusChangedJobs = (Map<SimulationJobList, List<SimulationJob>>) arg;
+
+        try {
+            for (SimulationJobList job : statusChangedJobs.keySet()) {
+                job.getSimulationMap().values().forEach(simulationJob -> {
+                    simBoardService.updateSimBoardRecord(simulationJob);
+                });
+                if (isProcessTerminated(job)) {
+                    job.getSimulationMap().values().forEach(simulationJob -> {
+                        // procedure: delete record from SIM_BOARD, add record to SIM_HISTORY
+                        simHistoryService.moveFromBoardToHistory(simulationJob);
+                    });
+                    // remove job from progress monitor
+                    progressMonitor.removeJob(job);
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    private boolean isFslTerminated(SimulationListJob job) {
+    private boolean isProcessTerminated(SimulationJobList job) {
         return job.getProcess().isAlive();
     }
 }
