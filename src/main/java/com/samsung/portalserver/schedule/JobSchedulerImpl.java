@@ -1,9 +1,13 @@
 package com.samsung.portalserver.schedule;
 
+import static com.samsung.portalserver.simulation.FileConstants.CONFIG_DIR_NAME;
+import static com.samsung.portalserver.simulation.FileConstants.DIR_DELIMETER;
+import static com.samsung.portalserver.simulation.FileConstants.HISTORY_DIR_PATH;
+
 import com.samsung.portalserver.common.Subscribable;
 import com.samsung.portalserver.common.Subscriber;
 import com.samsung.portalserver.domain.SimBoard;
-import com.samsung.portalserver.domain.SimulatorCategory;
+import com.samsung.portalserver.exceptions.GroupLevelException;
 import com.samsung.portalserver.repository.SimBoardStatus;
 import com.samsung.portalserver.schedule.job.Job;
 import com.samsung.portalserver.schedule.job.NewSimulationJobDto;
@@ -12,12 +16,13 @@ import com.samsung.portalserver.schedule.job.SimulationJobList;
 import com.samsung.portalserver.service.FileService;
 import com.samsung.portalserver.service.SimBoardService;
 import com.samsung.portalserver.service.SimHistoryService;
+import com.samsung.portalserver.simulation.AbstractSimulatorFactory;
+import com.samsung.portalserver.simulation.SimulatorCategory;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.jdom2.JDOMException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -33,6 +38,8 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
     private SimHistoryService simHistoryService;
     @Autowired
     private WorkloadManager workloadManager;
+    @Autowired
+    private AbstractSimulatorFactory simulatorFactory;
     private ProgressMonitor progressMonitor;
     private FileService fileService = new FileService();
 
@@ -65,16 +72,18 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
 
                     // try scheduling
                     prepare(simulationJobList);
-//                    executeJob(simulationJobList);
+                    executeJob(simulationJobList);
                     this.progressMonitor.addNewJob(simulationJobList);
                 } else {
                     System.out.println("SIM_BOARD does not have RESERVED Job");
                 }
             }
+        } catch (GroupLevelException e) {
+            simBoardService.updateStatus(Long.valueOf(e.getCause().getMessage()),
+                SimBoardStatus.ERROR.name());
         } catch (Exception e) {
-//            e.printStackTrace();
-//            simBoardService.updateStatus(Long.valueOf(e.getCause().getMessage()),
-//                SimBoardStatus.ERROR.name());
+            e.printStackTrace();
+
         }
     }
 
@@ -105,7 +114,7 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
                 "The execution server of SIM_BOARD(no: %d) and the current server are different. "
                     + "Current server is %d, but database value is %d", simBoard.getNo(),
                 CURRENT_SERVER_TEMP, simBoard.getExecution_server());
-            throw new IllegalStateException(errorMsg,
+            throw new GroupLevelException(errorMsg,
                 new Throwable(String.valueOf(simBoard.getNo())));
         }
     }
@@ -115,7 +124,7 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
             String errorMsg = String.format(
                 "The status of SIM_BOARD(no: %d) is not Waiting. database value is %s",
                 simBoard.getNo(), simBoard.getStatus());
-            throw new IllegalStateException(errorMsg,
+            throw new GroupLevelException(errorMsg,
                 new Throwable(String.valueOf(simBoard.getNo())));
         }
     }
@@ -133,7 +142,7 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
         } catch (Exception e) {
             // prepare 과정에서 문제가 발생하면 SIM_BOARD status를 ERROR로 변경
             String errorMsg = String.format("Exception occured in prepare");
-            throw new IllegalStateException(errorMsg);
+            throw new GroupLevelException(errorMsg);
         }
     }
 
@@ -146,15 +155,19 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
         }
     }
 
-    public void prepareScenarioConfigFiles(SimulationJobList simulationJobList)
-        throws IOException, JDOMException {
+    public void prepareScenarioConfigFiles(SimulationJobList simulationJobList) {
+
+        // Set scenario group path
+        String groupPath =
+            HISTORY_DIR_PATH + DIR_DELIMETER + simulationJobList.getUser() + DIR_DELIMETER
+                + simulationJobList.getSimulator() + DIR_DELIMETER + simulationJobList.getFslName();
+        simulationJobList.setGroupDirPath(groupPath);
 
         // Set scenario config path
         String configPath =
-            FileService.HISTORY_DIR_PATH + FileService.DIR_DELIMETER + simulationJobList.getUser()
-                + FileService.DIR_DELIMETER + simulationJobList.getSimulator()
-                + FileService.DIR_DELIMETER + simulationJobList.getFslName()
-                + FileService.DIR_DELIMETER + FileService.CONFIG_DIR_NAME;
+            HISTORY_DIR_PATH + DIR_DELIMETER + simulationJobList.getUser() + DIR_DELIMETER
+                + simulationJobList.getSimulator() + DIR_DELIMETER + simulationJobList.getFslName()
+                + DIR_DELIMETER + CONFIG_DIR_NAME;
         simulationJobList.setConfigDirPath(configPath);
 
         if (!existInCurrentServer(simulationJobList)) {
@@ -181,10 +194,10 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
             String[] splited = fileName.split("\\.");
             String extension = splited[splited.length - 1];
             if (extension.equals("fsl")) {
-                job.setFslFilePath(job.getConfigDirPath() + FileService.DIR_DELIMETER + fileName);
+                job.setFslFilePath(job.getConfigDirPath() + DIR_DELIMETER + fileName);
             } else if (extension.equals("fss")) {
                 job.getSimulationMap().get(splited[0])
-                    .setFssFilePath(job.getConfigDirPath() + FileService.DIR_DELIMETER + fileName);
+                    .setFssFilePath(job.getConfigDirPath() + DIR_DELIMETER + fileName);
             }
         });
     }
@@ -202,54 +215,12 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
     public void executeJob(Job job) throws IOException {
         SimulationJobList simulationJobList = (SimulationJobList) job;
 
-        Optional<Process> process = SimulationProcessFactory(simulationJobList);
+        Optional<Process> process = simulatorFactory.create(simulationJobList);
         process.ifPresent(p -> simulationJobList.setProcess(p));
-    }
-
-    private Optional<Process> SimulationProcessFactory(SimulationJobList job) throws IOException {
-        // 팩토리 메서드 패턴으로 수정하기 !!
-        Runtime rt = Runtime.getRuntime();
-        Process process = null;
-
-        String executeCmd = String.format("java -jar %s/%s/%s/%s_%s.jar ",
-            FileService.SIMULATOR_DIR_PATH, job.getSimulator(), job.getVersion(),
-            job.getSimulator(), job.getVersion());
-        String args = "";
-        try {
-            switch (SimulatorCategory.getCategoryByString(job.getSimulator())) {
-                case MCPSIM:
-                    args = String.format("%s %s", job.getSimulator(), job.getVersion());
-                    process = rt.exec(executeCmd + args);
-                    break;
-                case OCS3SIM:
-                    args = String.format("%s %s", job.getSimulator(), job.getVersion());
-                    process = rt.exec(executeCmd + args);
-                    break;
-                case OCS4SIM:
-                    args = String.format("%s %s", job.getSimulator(), job.getVersion());
-                    process = rt.exec(executeCmd + args);
-                    break;
-                case SeeFlow:
-                    args = String.format("%s %s", job.getSimulator(), job.getVersion());
-                    process = rt.exec(executeCmd + args);
-                    break;
-                case REMOTE_SIM:
-                    args = String.format("%s %s", job.getSimulator(), job.getVersion());
-                    process = rt.exec(executeCmd + args);
-                    break;
-                default:
-                    process = null;
-            }
-        } catch (IOException e) {
-            throw new IOException(e.getMessage());
-        }
-
-        return Optional.ofNullable(process);
     }
 
     @Override
     public void update(Subscribable s, Object arg) {
-        System.out.println("update update update update update update update update ");
         Map<SimulationJobList, List<SimulationJob>> statusChangedJobs = (Map<SimulationJobList, List<SimulationJob>>) arg;
 
         try {

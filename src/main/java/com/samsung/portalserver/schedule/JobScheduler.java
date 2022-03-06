@@ -1,5 +1,6 @@
 package com.samsung.portalserver.schedule;
 
+import com.samsung.portalserver.exceptions.GroupLevelException;
 import com.samsung.portalserver.schedule.job.Job;
 
 import java.io.IOException;
@@ -10,5 +11,5 @@ public interface JobScheduler {
 
     void prepare(Job job);
 
-    void executeJob(Job job) throws IOException;
+    void executeJob(Job job) throws IOException, GroupLevelException;
 }
