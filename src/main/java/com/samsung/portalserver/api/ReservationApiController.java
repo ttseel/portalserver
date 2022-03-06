@@ -1,19 +1,25 @@
 package com.samsung.portalserver.api;
 
+import static com.samsung.portalserver.simulation.FileConstants.CONFIG_DIR_NAME;
+import static com.samsung.portalserver.simulation.FileConstants.DIR_DELIMETER;
+import static com.samsung.portalserver.simulation.FileConstants.HISTORY_DIR_PATH;
+
 import com.samsung.portalserver.api.dto.NewReservationDto;
 import com.samsung.portalserver.api.dto.StatusAndMessageDto;
-import com.samsung.portalserver.domain.SimulatorCategory;
-import com.samsung.portalserver.service.FileService;
 import com.samsung.portalserver.service.ReservationService;
 import com.samsung.portalserver.service.SimBoardService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
-
+import com.samsung.portalserver.simulation.SimulatorCategory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,10 +35,9 @@ public class ReservationApiController {
         statusAndMessageDto.getMessage().add("Reservation request has failed");
 
         String saveDirectoryPath =
-            FileService.HISTORY_DIR_PATH + FileService.DIR_DELIMETER + newReservationDto.getUser()
-                + FileService.DIR_DELIMETER + newReservationDto.getSimulator()
-                + FileService.DIR_DELIMETER + newReservationDto.getFslName()
-                + FileService.DIR_DELIMETER + FileService.CONFIG_DIR_NAME;
+            HISTORY_DIR_PATH + DIR_DELIMETER + newReservationDto.getUser() + DIR_DELIMETER
+                + newReservationDto.getSimulator() + DIR_DELIMETER + newReservationDto.getFslName()
+                + DIR_DELIMETER + CONFIG_DIR_NAME;
 
         boolean isSuccessSaveTheFile = reservationService.saveScenarioFile(saveDirectoryPath,
             newReservationDto.getFslFile(), newReservationDto.getFssFiles());

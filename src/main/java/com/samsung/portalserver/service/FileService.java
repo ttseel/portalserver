@@ -1,11 +1,15 @@
 package com.samsung.portalserver.service;
 
-import org.apache.commons.io.FileUtils;
-import org.springframework.web.multipart.MultipartFile;
+import static com.samsung.portalserver.simulation.FileConstants.DIR_DELIMETER;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.nio.file.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,31 +17,12 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.FileUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 
 public class FileService {
-
-    public static final String EXTENSION_TXT = ".txt";
-    public static final String EXTENSION_FSS = ".fsl";
-    public static final String EXTENSION_FSL = ".fss";
-
-    public static final String NAME_DELIMETER = "+";
-    public static final String DIR_DELIMETER = "/";
-    public static final String FILE_DIR_ROOT_PATH = "/Users/js.oh/Desktop/Developers/simportal";
-    public static final String HISTORY_DIR_PATH = "/Users/js.oh/Desktop/Developers/simportal/history";
-    public static final String SIMULATOR_DIR_PATH = "/Users/js.oh/Desktop/Developers/simportal/simulator";
-    public static final String CONFIG_DIR_NAME = "config";
-    public static final String CONFIG_DIR_PATH =
-        FILE_DIR_ROOT_PATH + DIR_DELIMETER + CONFIG_DIR_NAME;
-    public static final String MASTERDATA_DIR_PATH = "/Users/js.oh/Desktop/Developers/simportal/masterdata";
-    public static final String MASTERDATA_MCPSIM_DIR_PATH =
-        MASTERDATA_DIR_PATH + DIR_DELIMETER + "mcpsim";
-    public static final String MCPSIM_DATA_DIR_PATH =
-        MASTERDATA_MCPSIM_DIR_PATH + DIR_DELIMETER + "data";
-    public static final String MCPSIM_INPUT_DIR_PATH =
-        MASTERDATA_MCPSIM_DIR_PATH + DIR_DELIMETER + "input";
-    public static final String TR_HISTORY_DIR_PATH =
-        MASTERDATA_DIR_PATH + DIR_DELIMETER + "common" + DIR_DELIMETER + "history";
 
 
     public void makeZipFiles(List<String> filePathIncludeNameAndExtention) {

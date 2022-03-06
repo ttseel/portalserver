@@ -1,8 +1,11 @@
 package com.samsung.portalserver.service;
 
+import static com.samsung.portalserver.simulation.FileConstants.DIR_DELIMETER;
+import static com.samsung.portalserver.simulation.FileConstants.SIMULATOR_DIR_PATH;
+
 import com.samsung.portalserver.api.dto.NewReservationDto;
 import com.samsung.portalserver.domain.SimBoard;
-import com.samsung.portalserver.domain.SimulatorCategory;
+import com.samsung.portalserver.simulation.SimulatorCategory;
 import com.samsung.portalserver.repository.SimBoardRepository;
 import com.samsung.portalserver.repository.SimBoardStatus;
 import com.samsung.portalserver.schedule.JobSchedulerImpl;
@@ -101,7 +104,7 @@ public class ReservationService {
 
     public Optional<ArrayList<String>> getEachVersionList(SimulatorCategory simulatorName) {
         ArrayList<String> versions = fileService.getFileList(
-            FileService.SIMULATOR_DIR_PATH + FileService.DIR_DELIMETER + simulatorName.toString());
+            SIMULATOR_DIR_PATH + DIR_DELIMETER + simulatorName.toString());
 
         versions.sort(Comparator.reverseOrder());
         return Optional.ofNullable(versions);
@@ -116,6 +119,6 @@ public class ReservationService {
             e.printStackTrace();
         }
         return fileService.aleadyExistFileOrDir(
-            saveDirectoryPath + FileService.DIR_DELIMETER + fslFile.getOriginalFilename());
+            saveDirectoryPath + DIR_DELIMETER + fslFile.getOriginalFilename());
     }
 }

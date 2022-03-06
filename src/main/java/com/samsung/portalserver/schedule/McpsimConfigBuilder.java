@@ -1,5 +1,10 @@
 package com.samsung.portalserver.schedule;
 
+import static com.samsung.portalserver.simulation.FileConstants.DIR_DELIMETER;
+import static com.samsung.portalserver.simulation.FileConstants.MCPSIM_DATA_DIR_PATH;
+import static com.samsung.portalserver.simulation.FileConstants.MCPSIM_INPUT_DIR_PATH;
+import static com.samsung.portalserver.simulation.FileConstants.TR_HISTORY_DIR_PATH;
+
 import com.samsung.portalserver.schedule.job.Job;
 import com.samsung.portalserver.schedule.job.SimulationJob;
 import com.samsung.portalserver.schedule.job.SimulationJobList;
@@ -122,14 +127,12 @@ public class McpsimConfigBuilder implements ConfigBuilder {
         String[] splited = ohtc.getChild("cfg-path").getText().split("/");
         String configDate = splited[splited.length - 1];
 
-        ohtc.getChild("cfg-path").setText(
-            FileService.MCPSIM_DATA_DIR_PATH + FileService.DIR_DELIMETER + ohtcId
-                + FileService.DIR_DELIMETER + configDate);
+        ohtc.getChild("cfg-path")
+            .setText(MCPSIM_DATA_DIR_PATH + DIR_DELIMETER + ohtcId + DIR_DELIMETER + configDate);
     }
 
     private void modifyInputPathElement(Element ohtc, String ohtcId) {
-        ohtc.getChild("input-path")
-            .setText(FileService.MCPSIM_INPUT_DIR_PATH + FileService.DIR_DELIMETER + ohtcId);
+        ohtc.getChild("input-path").setText(MCPSIM_INPUT_DIR_PATH + DIR_DELIMETER + ohtcId);
     }
 
     private void modifyHistoryPathElement(Element ohtc, String ohtcId) {
@@ -137,16 +140,15 @@ public class McpsimConfigBuilder implements ConfigBuilder {
         String trHistoryFileName = splited[splited.length - 1];
 
         ohtc.getChild("history-path").setText(
-            FileService.TR_HISTORY_DIR_PATH + FileService.DIR_DELIMETER + ohtcId
-                + FileService.DIR_DELIMETER + trHistoryFileName);
+            TR_HISTORY_DIR_PATH + DIR_DELIMETER + ohtcId + DIR_DELIMETER + trHistoryFileName);
     }
 
     private void modifyTrGenConfigPathElement(Element ohtc) {
         String[] splited = ohtc.getChild("tr-gen-config-path").getText().split("/");
         String trGenConfigFileName = splited[splited.length - 1];
 
-        ohtc.getChild("tr-gen-config-path").setText(
-            simulationJobList.getConfigDirPath() + FileService.DIR_DELIMETER + trGenConfigFileName);
+        ohtc.getChild("tr-gen-config-path")
+            .setText(simulationJobList.getConfigDirPath() + DIR_DELIMETER + trGenConfigFileName);
     }
 
     private void setXmlFormat(XMLOutputter outputter) {
