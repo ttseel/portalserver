@@ -1,4 +1,4 @@
-package com.samsung.portalserver.domain;
+package com.samsung.portalserver.simulation;
 
 public enum SimulatorCategory {
     ALL, AMHS_SIM, MCPSIM, OCS3SIM, OCS4SIM, SeeFlow, REMOTE_SIM, NOT_FOUND;

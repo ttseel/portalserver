@@ -132,13 +132,18 @@ public class SimBoardService {
         return simBoardRepository.findNewSim(executionServer);
     }
 
+    public void updateStatus(Long simBoardPKNo, String status) {
+        Optional<SimBoard> simBoard = simBoardRepository.readUniqueRecord(simBoardPKNo);
+        simBoard.ifPresent(sb -> sb.setStatus(status));
+    }
+
     public void updateSimBoardRecord(SimulationJob simulationJob) {
         Optional<SimBoard> simBoard = simBoardRepository.readUniqueRecord(
             simulationJob.getSimBoardPKNo());
 
         simBoard.ifPresent(sb -> {
             sb.setCurrent_rep(simulationJob.getCurrent_rep());
-            sb.setStatus(SimBoardStatus.RUNNING.name());
+            sb.setStatus(simulationJob.getStatus());
         });
         // 이후 Commit 되는 시점에서 JPA가 Entity의 변화를 확인하고 update 쿼리를 DB에 날려준 뒤 Transaction이 종료됨
     }
