@@ -1,6 +1,6 @@
 package com.samsung.portalserver.service;
 
-import static com.samsung.portalserver.simulation.FileConstants.DIR_DELIMETER;
+import static com.samsung.portalserver.service.FileConstants.DIR_DELIMETER;
 
 import java.io.File;
 import java.io.FileInputStream;

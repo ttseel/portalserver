@@ -1,9 +1,9 @@
 package com.samsung.portalserver.schedule;
 
-import static com.samsung.portalserver.simulation.FileConstants.DIR_DELIMETER;
-import static com.samsung.portalserver.simulation.FileConstants.MCPSIM_DATA_DIR_PATH;
-import static com.samsung.portalserver.simulation.FileConstants.MCPSIM_INPUT_DIR_PATH;
-import static com.samsung.portalserver.simulation.FileConstants.TR_HISTORY_DIR_PATH;
+import static com.samsung.portalserver.service.FileConstants.DIR_DELIMETER;
+import static com.samsung.portalserver.service.FileConstants.MCPSIM_DATA_DIR_PATH;
+import static com.samsung.portalserver.service.FileConstants.MCPSIM_INPUT_DIR_PATH;
+import static com.samsung.portalserver.service.FileConstants.TR_HISTORY_DIR_PATH;
 
 import com.samsung.portalserver.schedule.job.Job;
 import com.samsung.portalserver.schedule.job.SimulationJob;

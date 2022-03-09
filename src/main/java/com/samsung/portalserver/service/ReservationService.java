@@ -1,25 +1,27 @@
 package com.samsung.portalserver.service;
 
-import static com.samsung.portalserver.simulation.FileConstants.DIR_DELIMETER;
-import static com.samsung.portalserver.simulation.FileConstants.SIMULATOR_DIR_PATH;
+import static com.samsung.portalserver.service.FileConstants.DIR_DELIMETER;
+import static com.samsung.portalserver.service.FileConstants.SIMULATOR_DIR_PATH;
 
 import com.samsung.portalserver.api.dto.NewReservationDto;
 import com.samsung.portalserver.domain.SimBoard;
-import com.samsung.portalserver.simulation.SimulatorCategory;
 import com.samsung.portalserver.repository.SimBoardRepository;
 import com.samsung.portalserver.repository.SimBoardStatus;
 import com.samsung.portalserver.schedule.JobSchedulerImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
+import com.samsung.portalserver.simulation.SimulatorCategory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Service
@@ -63,51 +65,41 @@ public class ReservationService {
         simBoardRepository.delete(simBoard);
     }
 
-    public Optional<Map<String, ArrayList<String>>> getSimulatorVersionList(
-        SimulatorCategory simulator) {
-        ArrayList<String> mcpsimVersions = new ArrayList<>();
-        ArrayList<String> ocs3simVersions = new ArrayList<>();
-        ArrayList<String> ocs4simVersions = new ArrayList<>();
-        ArrayList<String> seeflowVersions = new ArrayList<>();
-        ArrayList<String> remoteSimVersions = new ArrayList<>();
+    public Map<String, List<String>> getSimulatorVersionList(SimulatorCategory simulator) {
 
-        Map<String, ArrayList<String>> SimulationVersion = new ConcurrentHashMap<>();
+        Map<String, List<String>> SimulationVersion = new HashMap<>();
 
-        if (simulator.equals(SimulatorCategory.ALL)) {
-            mcpsimVersions = getEachVersionList(SimulatorCategory.MCPSIM).get();
-            ocs3simVersions = getEachVersionList(SimulatorCategory.OCS3SIM).get();
-            ocs4simVersions = getEachVersionList(SimulatorCategory.OCS4SIM).get();
-            seeflowVersions = getEachVersionList(SimulatorCategory.SeeFlow).get();
-            remoteSimVersions = getEachVersionList(SimulatorCategory.REMOTE_SIM).get();
-        } else if (simulator.equals(SimulatorCategory.MCPSIM)) {
-            mcpsimVersions = getEachVersionList(SimulatorCategory.MCPSIM).get();
-        } else if (simulator.equals(SimulatorCategory.OCS3SIM)) {
-            ocs3simVersions = getEachVersionList(SimulatorCategory.OCS3SIM).get();
-        } else if (simulator.equals(SimulatorCategory.OCS4SIM)) {
-            ocs4simVersions = getEachVersionList(SimulatorCategory.OCS4SIM).get();
-        } else if (simulator.equals(SimulatorCategory.SeeFlow)) {
-            seeflowVersions = getEachVersionList(SimulatorCategory.SeeFlow).get();
-        } else if (simulator.equals(SimulatorCategory.REMOTE_SIM)) {
-            remoteSimVersions = getEachVersionList(SimulatorCategory.REMOTE_SIM).get();
-        } else {
+        if (simulator.equals(SimulatorCategory.NOT_FOUND)) {
             throw new IllegalArgumentException("UI Simulator 이름과 서버의 시뮬레이터 디렉토리 이름 불일치");
         }
 
-        SimulationVersion.put(SimulatorCategory.MCPSIM.toString(), mcpsimVersions);
-        SimulationVersion.put(SimulatorCategory.OCS3SIM.toString(), ocs3simVersions);
-        SimulationVersion.put(SimulatorCategory.OCS4SIM.toString(), ocs4simVersions);
-        SimulationVersion.put(SimulatorCategory.SeeFlow.toString(), seeflowVersions);
-        SimulationVersion.put(SimulatorCategory.REMOTE_SIM.toString(), remoteSimVersions);
+        if (simulator.equals(SimulatorCategory.ALL)) {
+            SimulationVersion = getAllVersionList();
+        } else {
+            SimulationVersion.put(simulator.name(), getEachVersionList(simulator));
+        }
 
-        return Optional.of(SimulationVersion);
+        return SimulationVersion;
     }
 
-    public Optional<ArrayList<String>> getEachVersionList(SimulatorCategory simulatorName) {
+    public ArrayList<String> getEachVersionList(SimulatorCategory simulatorName) {
         ArrayList<String> versions = fileService.getFileList(
             SIMULATOR_DIR_PATH + DIR_DELIMETER + simulatorName.toString());
 
         versions.sort(Comparator.reverseOrder());
-        return Optional.ofNullable(versions);
+        return versions;
+    }
+
+    public Map<String, List<String>> getAllVersionList() {
+        Map<String, List<String>> allVersionList = new HashMap<>();
+
+        for (SimulatorCategory value : SimulatorCategory.values()) {
+            if (value.equals(SimulatorCategory.NOT_FOUND)) {
+                continue;
+            }
+            allVersionList.put(value.name(), getEachVersionList(value));
+        }
+        return allVersionList;
     }
 
     public boolean saveScenarioFile(String saveDirectoryPath, MultipartFile fslFile,

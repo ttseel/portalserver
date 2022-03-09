@@ -1,19 +1,19 @@
 package com.samsung.portalserver.api;
 
-import static com.samsung.portalserver.simulation.FileConstants.CONFIG_DIR_NAME;
-import static com.samsung.portalserver.simulation.FileConstants.DIR_DELIMETER;
-import static com.samsung.portalserver.simulation.FileConstants.HISTORY_DIR_PATH;
+import static com.samsung.portalserver.service.FileConstants.CONFIG_DIR_NAME;
+import static com.samsung.portalserver.service.FileConstants.DIR_DELIMETER;
+import static com.samsung.portalserver.service.FileConstants.HISTORY_DIR_PATH;
 
 import com.samsung.portalserver.api.dto.NewReservationDto;
 import com.samsung.portalserver.api.dto.StatusAndMessageDto;
 import com.samsung.portalserver.service.ReservationService;
 import com.samsung.portalserver.service.SimBoardService;
 import com.samsung.portalserver.simulation.SimulatorCategory;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,8 +25,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class ReservationApiController {
 
-    private final ReservationService reservationService;
-    private final SimBoardService simBoardService;
+    @Autowired
+    private ReservationService reservationService;
+    @Autowired
+    private SimBoardService simBoardService;
 
     @PostMapping(value = "/api/simulation/reservation/reserve-new-scenario", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public StatusAndMessageDto reserveNewSceanrio(NewReservationDto newReservationDto) {
@@ -34,12 +36,9 @@ public class ReservationApiController {
         statusAndMessageDto.setStatus(false);
         statusAndMessageDto.getMessage().add("Reservation request has failed");
 
-        String saveDirectoryPath =
-            HISTORY_DIR_PATH + DIR_DELIMETER + newReservationDto.getUser() + DIR_DELIMETER
-                + newReservationDto.getSimulator() + DIR_DELIMETER + newReservationDto.getFslName()
-                + DIR_DELIMETER + CONFIG_DIR_NAME;
+        String groupPath = makeGroupPath(newReservationDto);
 
-        boolean isSuccessSaveTheFile = reservationService.saveScenarioFile(saveDirectoryPath,
+        boolean isSuccessSaveTheFile = reservationService.saveScenarioFile(groupPath,
             newReservationDto.getFslFile(), newReservationDto.getFssFiles());
         if (isSuccessSaveTheFile) {
             try {
@@ -50,10 +49,14 @@ public class ReservationApiController {
             } catch (Exception e) {
                 System.out.println(e);
             }
-
-            return statusAndMessageDto;
         }
         return statusAndMessageDto;
+    }
+
+    public String makeGroupPath(NewReservationDto newReservationDto) {
+        return HISTORY_DIR_PATH + DIR_DELIMETER + newReservationDto.getUser() + DIR_DELIMETER
+            + newReservationDto.getSimulator() + DIR_DELIMETER + newReservationDto.getFslName()
+            + DIR_DELIMETER + CONFIG_DIR_NAME;
     }
 
     @DeleteMapping("/api/simulation/simboard/cancel-reservation")
@@ -68,18 +71,26 @@ public class ReservationApiController {
     }
 
     @GetMapping("/api/simulation/reservation/version-list")
-    public Optional<Map<String, ArrayList<String>>> versionList(
-        @RequestParam("simulator") String simulator) {
+    public Map<String, List<String>> getVersionList(@RequestParam("simulator") String simulator) {
 
-        Optional<Map<String, ArrayList<String>>> simVersionsList = Optional.empty();
+        Map<String, List<String>> simVersionsList;
 
-        if (simulator.equals(SimulatorCategory.ALL.name())) {
-            simVersionsList = reservationService.getSimulatorVersionList(SimulatorCategory.ALL);
-        } else {
+        if (checkEachVersion(simulator)) {
             simVersionsList = reservationService.getSimulatorVersionList(
-                SimulatorCategory.getCategoryByString(simulator));
+                SimulatorCategory.getByString(simulator));
+        } else {
+            simVersionsList = reservationService.getSimulatorVersionList(SimulatorCategory.ALL);
         }
         return simVersionsList;
+    }
+
+    private boolean checkEachVersion(String simulator) {
+        if (SimulatorCategory.getByString(simulator).equals(SimulatorCategory.ALL)
+            || SimulatorCategory.getByString(simulator).equals(SimulatorCategory.NOT_FOUND)) {
+            return false;
+        }
+
+        return true;
     }
 
     @GetMapping("/api/simulation/reservation/validate-reserve")
@@ -92,4 +103,5 @@ public class ReservationApiController {
 
         return statusAndMessageDto;
     }
+
 }
