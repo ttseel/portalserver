@@ -1,8 +1,8 @@
 package com.samsung.portalserver.schedule;
 
-import static com.samsung.portalserver.simulation.FileConstants.CONFIG_DIR_NAME;
-import static com.samsung.portalserver.simulation.FileConstants.DIR_DELIMETER;
-import static com.samsung.portalserver.simulation.FileConstants.HISTORY_DIR_PATH;
+import static com.samsung.portalserver.service.FileConstants.CONFIG_DIR_NAME;
+import static com.samsung.portalserver.service.FileConstants.DIR_DELIMETER;
+import static com.samsung.portalserver.service.FileConstants.HISTORY_DIR_PATH;
 
 import com.samsung.portalserver.common.Subscribable;
 import com.samsung.portalserver.common.Subscriber;
@@ -62,7 +62,7 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
             if (workloadManager.checkPossibleToWork()) {
                 Optional<List<SimBoard>> newJobs = findNewJob();
 
-                if (newJobs.isPresent()) {
+                if (newJobs.isPresent() && !newJobs.get().isEmpty()) {
                     SimulationJobList simulationJobList = new SimulationJobList(
                         newJobs.get().get(0));
                     newJobs.get().forEach(simBoard -> {
@@ -133,7 +133,7 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
     public void prepare(Job job) {
         SimulationJobList simulationJobList = (SimulationJobList) job;
         Optional<ConfigBuilder> configBuilder = setConfigBuilder(
-            SimulatorCategory.getCategoryByString(simulationJobList.getSimulator()));
+            SimulatorCategory.getByString(simulationJobList.getSimulator()));
         try {
             if (configBuilder.isPresent()) {
                 prepareScenarioConfigFiles(simulationJobList);

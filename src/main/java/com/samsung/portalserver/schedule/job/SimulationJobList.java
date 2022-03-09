@@ -14,6 +14,7 @@ public class SimulationJobList implements Job {
     private Process process;
     private String configDirPath;
     private String fslFilePath;
+    private String groupDirPath;
     private String fslName;
     private String simulator;
     private String version;

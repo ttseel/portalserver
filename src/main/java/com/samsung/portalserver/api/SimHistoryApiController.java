@@ -29,9 +29,9 @@ public class SimHistoryApiController {
 
     @GetMapping("/api/simulation/my-simulation/download-my-history")
     private void downloadMyHistory(@RequestParam("user") String user,
-        @RequestParam("simulator") String simulator, @RequestParam("scenario") String scenario,
-        HttpServletResponse response) {
+        @RequestParam("simulator") String simulator, @RequestParam("group") String group,
+        @RequestParam("scenario") String scenario, HttpServletResponse response) {
 
-        simHistoryService.downloadMyHistory(user, simulator, scenario, response);
+        simHistoryService.downloadMyHistory(user, simulator, group, scenario, response);
     }
 }

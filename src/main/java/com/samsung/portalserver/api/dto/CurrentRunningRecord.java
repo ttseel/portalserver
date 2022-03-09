@@ -9,8 +9,10 @@ import java.util.List;
 
 @Data
 public class CurrentRunningRecord {
+
     private Long key;
     private Long no;
+    private String group;
     private String scenario;
     private String simulator;
     private String version;
@@ -25,6 +27,7 @@ public class CurrentRunningRecord {
     public CurrentRunningRecord(Long no, SimBoard simBoard) {
         this.key = no;
         this.no = no;
+        this.group = simBoard.getFsl_name();
         this.scenario = simBoard.getScenario();
         this.version = simBoard.getVersion();
         this.simulator = simBoard.getSimulator();

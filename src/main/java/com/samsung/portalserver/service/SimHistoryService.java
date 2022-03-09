@@ -1,5 +1,9 @@
 package com.samsung.portalserver.service;
 
+import static com.samsung.portalserver.service.FileConstants.*;
+import static com.samsung.portalserver.service.FileConstants.DIR_DELIMETER;
+import static com.samsung.portalserver.service.FileConstants.HISTORY_DIR_PATH;
+
 import com.samsung.portalserver.domain.SimHistory;
 import com.samsung.portalserver.repository.SimHistoryRepository;
 import com.samsung.portalserver.schedule.job.SimulationJob;
@@ -47,10 +51,11 @@ public class SimHistoryService {
 
         private Long key;
         private Long no;
+        private String group;
         private String scenario;
         private String simulator;
         private String version;
-        private Integer completedRep;
+        private Integer endRep;
         private Integer requestRep;
         private LocalDateTime startDate;
         private LocalDateTime endDate;
@@ -60,10 +65,11 @@ public class SimHistoryService {
         public MyHistoryDto(Long no, SimHistory simHistory) {
             this.key = no;
             this.no = no;
+            this.group = simHistory.getFsl_name();
             this.scenario = simHistory.getScenario();
             this.simulator = simHistory.getSimulator();
             this.version = simHistory.getVersion();
-            this.completedRep = simHistory.getCompleted_rep();
+            this.endRep = simHistory.getCompleted_rep();
             this.requestRep = simHistory.getRequest_rep();
             this.startDate = simHistory.getStart_date();
             this.endDate = simHistory.getEnd_date();
@@ -72,20 +78,21 @@ public class SimHistoryService {
         }
     }
 
-    public void downloadMyHistory(String user, String simulator, String scenario,
+    public void downloadMyHistory(String user, String simulator, String group, String scenario,
         HttpServletResponse response) {
-        user = "USER1";
-        simulator = "AMHS Sim";
-        scenario = "Scenario1";
+//        user = "USER2";
+//        simulator = "MCPSIM";
+//        group = "ScenarioList7";
+//        scenario = "Scenario1";
         String directoryPathToZip =
-            "/Users/js.oh/Desktop/Developers/simportal/history" + "/" + user + "/" + simulator + "/"
-                + scenario;
-        String downloadFileName = simulator + "+" + scenario + ".zip"; // 다운로드 파일 이름 명시
-        String tempDirectoryPath = "/Users/js.oh/Desktop/Developers/simportal/temp/";
+            HISTORY_DIR_PATH + DIR_DELIMETER + user + DIR_DELIMETER + simulator + DIR_DELIMETER
+                + group + DIR_DELIMETER + scenario;
+        String downloadFileName = scenario + EXTENSION_ZIP; // 다운로드 파일 이름 명시
 
-        ZipUtil.pack(new File(directoryPathToZip), new File(tempDirectoryPath + downloadFileName));
+        ZipUtil.pack(new File(directoryPathToZip),
+            new File(TEMP_DIR_PATH + DIR_DELIMETER + downloadFileName));
 
-        File file = new File(tempDirectoryPath + downloadFileName);
+        File file = new File(TEMP_DIR_PATH + DIR_DELIMETER + downloadFileName);
 
         response.setHeader("Content-Disposition",
             "attachment; filename=\"" + downloadFileName + "\";");
@@ -95,9 +102,9 @@ public class SimHistoryService {
         response.setHeader("Pragma", "no-cache;");
         response.setHeader("Expires", "-1;");
 
-        fileService.setFileIntoResponse(tempDirectoryPath, downloadFileName, response);
+        fileService.setFileIntoResponse(TEMP_DIR_PATH, downloadFileName, response);
 
-        fileService.deleteFile(tempDirectoryPath, downloadFileName);
+        fileService.deleteFile(TEMP_DIR_PATH, downloadFileName);
     }
 
     public Long moveFromBoardToHistory(SimulationJob job) {

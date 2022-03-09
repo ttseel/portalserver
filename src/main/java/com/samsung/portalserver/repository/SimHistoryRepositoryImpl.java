@@ -45,16 +45,16 @@ public class SimHistoryRepositoryImpl implements SimHistoryRepository {
     public Long moveFromBoardToHistory(SimulationJob job) {
         StoredProcedureQuery query = em.createStoredProcedureQuery(
             "HYPPEOPLE.usp_move_from_board_to_history");
-        query.registerStoredProcedureParameter("sim_board_no", Integer.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("h_completed_no", Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("sim_board_no", Long.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("h_completed_rep", Integer.class, ParameterMode.IN);
         query.registerStoredProcedureParameter("h_termination_reason", String.class,
             ParameterMode.IN);
         query.registerStoredProcedureParameter("h_end_date", LocalDateTime.class, ParameterMode.IN);
         query.registerStoredProcedureParameter("hist_no", Long.class, ParameterMode.OUT);
         query.setParameter("sim_board_no", job.getSimBoardPKNo());
-        query.setParameter("h_completed_no", job.getCurrent_rep());
+        query.setParameter("h_completed_rep", job.getCurrent_rep());
         query.setParameter("h_termination_reason", job.getTermination_reason());
-        query.setParameter("h_end_date", job.getEnd_date());
+        query.setParameter("h_end_date", LocalDateTime.now());
         boolean queryResult = query.execute();
         Long result = (Long) query.getOutputParameterValue("hist_no");
         return result;

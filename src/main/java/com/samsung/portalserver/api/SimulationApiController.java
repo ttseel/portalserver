@@ -1,10 +1,9 @@
 package com.samsung.portalserver.api;
 
+import com.samsung.portalserver.api.dto.UniqueSimulationRecordDto;
 import com.samsung.portalserver.service.SimulationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -14,13 +13,12 @@ public class SimulationApiController {
     private final SimulationService simulationService;
 
     @DeleteMapping("/api/simulation/simboard/stop-sim")
-    public Boolean stopSim(@RequestParam("user") String user,
-        @RequestParam("simulator") String simulator, @RequestParam("scenario") String scenario) {
+    public Boolean stopSim(UniqueSimulationRecordDto dto) {
 
-        simulationService.stopSimulation(user, simulator, scenario);
+        simulationService.stopSimulation(dto);
 
         String res = String.format("user: %s, scenario: %s stopped successfully",
-            user.toUpperCase(), scenario);
+            dto.getUser().toUpperCase(), dto.getScenario());
 
         return true;
     }

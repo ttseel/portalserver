@@ -2,6 +2,7 @@ package com.samsung.portalserver.service;
 
 public class FileConstants {
 
+    public static final String EXTENSION_ZIP = ".zip";
     public static final String EXTENSION_TXT = ".txt";
     public static final String EXTENSION_FSS = ".fsl";
     public static final String EXTENSION_FSL = ".fss";
@@ -16,6 +17,7 @@ public class FileConstants {
         FILE_DIR_ROOT_PATH + DIR_DELIMETER + "simulator";
     public static final String MASTERDATA_DIR_PATH =
         FILE_DIR_ROOT_PATH + DIR_DELIMETER + "masterdata";
+    public static final String TEMP_DIR_PATH = FILE_DIR_ROOT_PATH + DIR_DELIMETER + "temp";
 
     public static final String CONFIG_DIR_NAME = "config";
     public static final String MASTERDATA_MCPSIM_DIR_PATH =

@@ -9,8 +9,10 @@ import java.util.List;
 
 @Data
 public class ReservedScenarioRecord {
+
     private Long key;
     private Long no;
+    private String group;
     private String scenario;
     private String simulator;
     private String version;
@@ -21,6 +23,7 @@ public class ReservedScenarioRecord {
     public ReservedScenarioRecord(Long no, SimBoard simBoard) {
         this.key = no;
         this.no = no;
+        this.group = simBoard.getFsl_name();
         this.scenario = simBoard.getScenario();
         this.simulator = simBoard.getSimulator();
         this.version = simBoard.getVersion();

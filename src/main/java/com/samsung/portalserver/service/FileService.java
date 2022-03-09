@@ -52,8 +52,8 @@ public class FileService {
 
     public void setFileIntoResponse(String filePath, String fileNameIncludeExtention,
         HttpServletResponse response) {
-        try (FileInputStream fis = new FileInputStream(
-            filePath + fileNameIncludeExtention); OutputStream out = response.getOutputStream();) {
+        try (FileInputStream fis = new FileInputStream(filePath + DIR_DELIMETER
+            + fileNameIncludeExtention); OutputStream out = response.getOutputStream();) {
             int readCount = 0;
             byte[] buffer = new byte[1024];
             while ((readCount = fis.read(buffer)) != -1) {
@@ -106,7 +106,7 @@ public class FileService {
 
     public void deleteFile(String filePath, String fileNameIncludeExtention) {
         try {
-            Path path = Paths.get(filePath + fileNameIncludeExtention);
+            Path path = Paths.get(filePath + DIR_DELIMETER + fileNameIncludeExtention);
             Files.delete(path);
         } catch (Exception e) {
             e.printStackTrace();
