@@ -8,7 +8,7 @@ import com.samsung.portalserver.repository.SimBoardRepository;
 import com.samsung.portalserver.repository.SimBoardStatus;
 import com.samsung.portalserver.repository.SimHistoryRepository;
 import com.samsung.portalserver.schedule.job.NewSimulationJobDto;
-import com.samsung.portalserver.schedule.job.SimulationJob;
+import com.samsung.portalserver.schedule.job.ScenarioJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -137,13 +137,13 @@ public class SimBoardService {
         simBoard.ifPresent(sb -> sb.setStatus(status));
     }
 
-    public void updateSimBoardRecord(SimulationJob simulationJob) {
+    public void updateSimBoardRecord(ScenarioJob scenarioJob) {
         Optional<SimBoard> simBoard = simBoardRepository.readUniqueRecord(
-            simulationJob.getSimBoardPKNo());
+            scenarioJob.getSimBoardPKNo());
 
         simBoard.ifPresent(sb -> {
-            sb.setCurrent_rep(simulationJob.getCurrent_rep());
-            sb.setStatus(simulationJob.getStatus());
+            sb.setCurrent_rep(scenarioJob.getCurrent_rep());
+            sb.setStatus(scenarioJob.getStatus());
         });
         // 이후 Commit 되는 시점에서 JPA가 Entity의 변화를 확인하고 update 쿼리를 DB에 날려준 뒤 Transaction이 종료됨
     }

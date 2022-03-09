@@ -23,7 +23,7 @@ public class SimulationJobList implements Job {
     private Integer execution_server;
     private LocalDateTime reservation_date;
     private LocalDateTime start_date;
-    private Map<String, SimulationJob> simulationMap;
+    private Map<String, ScenarioJob> scenarioMap;
 
     public SimulationJobList() {
     }
@@ -37,6 +37,6 @@ public class SimulationJobList implements Job {
         this.execution_server = simBoard.getExecution_server();
         this.reservation_date = simBoard.getReservation_date();
         this.start_date = simBoard.getStart_date();
-        simulationMap = new ConcurrentHashMap<>();
+        scenarioMap = new ConcurrentHashMap<>();
     }
 }

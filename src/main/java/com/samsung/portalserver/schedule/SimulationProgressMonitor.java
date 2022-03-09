@@ -2,9 +2,11 @@ package com.samsung.portalserver.schedule;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
+import com.samsung.portalserver.api.dto.UniqueSimulationRecordDto;
 import com.samsung.portalserver.common.Subscriber;
+import com.samsung.portalserver.repository.SimBoardStatus;
 import com.samsung.portalserver.schedule.job.Job;
-import com.samsung.portalserver.schedule.job.SimulationJob;
+import com.samsung.portalserver.schedule.job.ScenarioJob;
 import com.samsung.portalserver.schedule.job.SimulationJobList;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -13,8 +15,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -41,14 +43,14 @@ public class SimulationProgressMonitor implements ProgressMonitor {
     }
 
     @Override
-    @Scheduled(fixedDelay = 10000)
+//    @Scheduled(fixedDelay = 10000)
     public void monitoringProgress() {
         System.out.println(String.format("monitoringProgress start / thread name: %s ",
             Thread.currentThread().getName()));
 
-        Map<SimulationJobList, List<SimulationJob>> changedJobs = new ConcurrentHashMap<>();
+        Map<SimulationJobList, List<ScenarioJob>> changedJobs = new ConcurrentHashMap<>();
         for (SimulationJobList job : monitoringList) {
-            List<SimulationJob> changedSims = checkSimulationStatus(job);
+            List<ScenarioJob> changedSims = checkSimulationStatus(job);
             if (changedSims.size() > 0) {
                 changedJobs.put(job, changedSims);
             }
@@ -57,8 +59,8 @@ public class SimulationProgressMonitor implements ProgressMonitor {
     }
 
 
-    public List<SimulationJob> checkSimulationStatus(SimulationJobList job) {
-        List<SimulationJob> changedSimulation = new ArrayList<>();
+    public List<ScenarioJob> checkSimulationStatus(SimulationJobList job) {
+        List<ScenarioJob> changedSimulation = new ArrayList<>();
 
         String fslFilePath = job.getFslFilePath();
         fslFilePath = "/Users/js.oh/Desktop/Developers/simportal/history/USER2/MCPSIM/ScenarioList7/SimulationProgressForSimPortal.log";
@@ -70,11 +72,11 @@ public class SimulationProgressMonitor implements ProgressMonitor {
 
             if (needServerCheck(needCheckLog)) {
                 String scenario = splitedLog[0];
-                SimulationJob simulationJob = job.getSimulationMap().get(scenario);
+                ScenarioJob scenarioJob = job.getScenarioMap().get(scenario);
 
-                boolean isChanged = compareWithLog(splitedLog, simulationJob);
+                boolean isChanged = compareWithLog(splitedLog, scenarioJob);
                 if (isChanged) {
-                    changedSimulation.add(simulationJob);
+                    changedSimulation.add(scenarioJob);
                 }
             }
         }
@@ -99,30 +101,67 @@ public class SimulationProgressMonitor implements ProgressMonitor {
         return serverCheck.equals("NO");
     }
 
-    private boolean compareWithLog(String[] splitedLog, SimulationJob simulationJob) {
+    private boolean compareWithLog(String[] splitedLog, ScenarioJob scenarioJob) {
         boolean isCheanged = false;
         String repLog = splitedLog[2];
         String terminationReasonLog = splitedLog[4];
         String endDateLog = splitedLog[5];
 
-        if (simulationJob.getCurrent_rep() != Integer.parseInt(repLog)) {
-            simulationJob.setCurrent_rep(Integer.parseInt(repLog));
+        if (scenarioJob.getCurrent_rep() != Integer.parseInt(repLog)) {
+            scenarioJob.setCurrent_rep(Integer.parseInt(repLog));
             isCheanged = true;
         }
-        if (simulationJob.getEnd_date() != LocalDateTime.parse(endDateLog)) {
-            simulationJob.setEnd_date(LocalDateTime.parse(endDateLog));
+        if (scenarioJob.getStatus().equals(SimBoardStatus.WAITING.name())) {
+            scenarioJob.setStatus(SimBoardStatus.RUNNING.name());
             isCheanged = true;
         }
-        if (!simulationJob.getTermination_reason().equals(terminationReasonLog)) {
-            simulationJob.setTermination_reason(terminationReasonLog);
+        if (scenarioJob.getEnd_date() != LocalDateTime.parse(endDateLog)) {
+            scenarioJob.setEnd_date(LocalDateTime.parse(endDateLog));
+            isCheanged = true;
+        }
+        if (!scenarioJob.getTermination_reason().equals(terminationReasonLog)) {
+            scenarioJob.setTermination_reason(terminationReasonLog);
             isCheanged = true;
         }
 
         return isCheanged;
     }
 
-    private void notifyChangedStatus(
-        Map<SimulationJobList, List<SimulationJob>> statusChangedJobs) {
+    public boolean stopSimulation(UniqueSimulationRecordDto dto) {
+        boolean isStopped = false;
+        Optional<SimulationJobList> simulationJobList = findStopGroup(dto);
+        if (simulationJobList.isPresent()) {
+
+            SimulationJobList removeTarget = simulationJobList.get();
+            removeTarget.getProcess().destroy();
+
+            if (!removeTarget.getProcess().isAlive()) {
+                monitoringList.remove(removeTarget);
+                isStopped = true;
+            }
+        }
+
+        return isStopped;
+    }
+
+    private Optional<SimulationJobList> findStopGroup(UniqueSimulationRecordDto dto) {
+        for (SimulationJobList simulationJobList : monitoringList) {
+            if (isStopGroup(simulationJobList, dto)) {
+                return Optional.of(simulationJobList);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private boolean isStopGroup(SimulationJobList jobList, UniqueSimulationRecordDto dto) {
+        if (jobList.getFslName().equals(dto.getGroup()) && jobList.getUser().equals(dto.getUser())
+            && jobList.getSimulator().equals(dto.getSimulator())) {
+            return true;
+        }
+        return false;
+    }
+
+    private void notifyChangedStatus(Map<SimulationJobList, List<ScenarioJob>> statusChangedJobs) {
         notifytSubscribers(statusChangedJobs);
     }
 

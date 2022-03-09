@@ -6,7 +6,7 @@ import static com.samsung.portalserver.service.FileConstants.MCPSIM_INPUT_DIR_PA
 import static com.samsung.portalserver.service.FileConstants.TR_HISTORY_DIR_PATH;
 
 import com.samsung.portalserver.schedule.job.Job;
-import com.samsung.portalserver.schedule.job.SimulationJob;
+import com.samsung.portalserver.schedule.job.ScenarioJob;
 import com.samsung.portalserver.schedule.job.SimulationJobList;
 import com.samsung.portalserver.service.FileService;
 import java.io.File;
@@ -35,8 +35,8 @@ public class McpsimConfigBuilder implements ConfigBuilder {
             modifyPathElementOfFsl();
 
             // Modify fss
-            for (SimulationJob simulationJob : simulationJobList.getSimulationMap().values()) {
-                String fssPath = simulationJob.getFssFilePath();
+            for (ScenarioJob scenarioJob : simulationJobList.getScenarioMap().values()) {
+                String fssPath = scenarioJob.getFssFilePath();
 
                 // Modify Path Element of fss
                 modifyPathElementOfFss(fssPath);
@@ -98,7 +98,7 @@ public class McpsimConfigBuilder implements ConfigBuilder {
         Element scenarioLists = fslXml.getRootElement();
         scenarioLists.removeChildren("xml-list", scenarioLists.getNamespace());
 
-        simulationJobList.getSimulationMap().values().forEach(SimulationJob -> {
+        simulationJobList.getScenarioMap().values().forEach(SimulationJob -> {
             Element e = new Element("xml-list", scenarioLists.getNamespace());
             e.setText(SimulationJob.getFssFilePath());
             scenarioLists.addContent(e);

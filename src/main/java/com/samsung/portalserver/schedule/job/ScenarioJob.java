@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SimulationJob {
+public class ScenarioJob {
 
     private String fssFilePath;
     private String trGenFilePath;
@@ -23,7 +23,7 @@ public class SimulationJob {
     private LocalDateTime end_date;
     private String termination_reason;
 
-    public SimulationJob(SimBoard simBoard) {
+    public ScenarioJob(SimBoard simBoard) {
         this.fssFilePath = "";
         this.trGenFilePath = "";
         this.simBoardPKNo = simBoard.getNo();

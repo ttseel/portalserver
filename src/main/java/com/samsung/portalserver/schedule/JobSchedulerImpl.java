@@ -11,7 +11,7 @@ import com.samsung.portalserver.exceptions.GroupLevelException;
 import com.samsung.portalserver.repository.SimBoardStatus;
 import com.samsung.portalserver.schedule.job.Job;
 import com.samsung.portalserver.schedule.job.NewSimulationJobDto;
-import com.samsung.portalserver.schedule.job.SimulationJob;
+import com.samsung.portalserver.schedule.job.ScenarioJob;
 import com.samsung.portalserver.schedule.job.SimulationJobList;
 import com.samsung.portalserver.service.FileService;
 import com.samsung.portalserver.service.SimBoardService;
@@ -66,8 +66,8 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
                     SimulationJobList simulationJobList = new SimulationJobList(
                         newJobs.get().get(0));
                     newJobs.get().forEach(simBoard -> {
-                        simulationJobList.getSimulationMap()
-                            .put(simBoard.getScenario(), new SimulationJob(simBoard));
+                        simulationJobList.getScenarioMap()
+                            .put(simBoard.getScenario(), new ScenarioJob(simBoard));
                     });
 
                     // try scheduling
@@ -196,7 +196,7 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
             if (extension.equals("fsl")) {
                 job.setFslFilePath(job.getConfigDirPath() + DIR_DELIMETER + fileName);
             } else if (extension.equals("fss")) {
-                job.getSimulationMap().get(splited[0])
+                job.getScenarioMap().get(splited[0])
                     .setFssFilePath(job.getConfigDirPath() + DIR_DELIMETER + fileName);
             }
         });
@@ -221,15 +221,15 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
 
     @Override
     public void update(Subscribable s, Object arg) {
-        Map<SimulationJobList, List<SimulationJob>> statusChangedJobs = (Map<SimulationJobList, List<SimulationJob>>) arg;
+        Map<SimulationJobList, List<ScenarioJob>> statusChangedJobs = (Map<SimulationJobList, List<ScenarioJob>>) arg;
 
         try {
             for (SimulationJobList job : statusChangedJobs.keySet()) {
-                job.getSimulationMap().values().forEach(simulationJob -> {
+                job.getScenarioMap().values().forEach(simulationJob -> {
                     simBoardService.updateSimBoardRecord(simulationJob);
                 });
                 if (isProcessTerminated(job)) {
-                    job.getSimulationMap().values().forEach(simulationJob -> {
+                    job.getScenarioMap().values().forEach(simulationJob -> {
                         // procedure: delete record from SIM_BOARD, add record to SIM_HISTORY
                         simHistoryService.moveFromBoardToHistory(simulationJob);
                     });

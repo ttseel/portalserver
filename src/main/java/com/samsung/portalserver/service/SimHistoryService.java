@@ -6,7 +6,7 @@ import static com.samsung.portalserver.service.FileConstants.HISTORY_DIR_PATH;
 
 import com.samsung.portalserver.domain.SimHistory;
 import com.samsung.portalserver.repository.SimHistoryRepository;
-import com.samsung.portalserver.schedule.job.SimulationJob;
+import com.samsung.portalserver.schedule.job.ScenarioJob;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -107,7 +107,7 @@ public class SimHistoryService {
         fileService.deleteFile(TEMP_DIR_PATH, downloadFileName);
     }
 
-    public Long moveFromBoardToHistory(SimulationJob job) {
+    public Long moveFromBoardToHistory(ScenarioJob job) {
         return simHistoryRepository.moveFromBoardToHistory(job);
     }
 }

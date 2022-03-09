@@ -1,6 +1,6 @@
 package com.samsung.portalserver.simulation;
 
-import static com.samsung.portalserver.simulation.FileConstants.SIMULATOR_DIR_PATH;
+import static com.samsung.portalserver.service.FileConstants.SIMULATOR_DIR_PATH;
 
 import com.samsung.portalserver.exceptions.GroupLevelException;
 import com.samsung.portalserver.schedule.job.SimulationJobList;
@@ -21,8 +21,14 @@ public class ExternalJarAbstractSimulatorFactory extends AbstractSimulatorFactor
 
         String executeCmd = String.format("java -jar %s ", simualtorPath);
 
+        /**
+         * args
+         * [0]: fsl_directory_path
+         * [1]: useMotion
+         * [2]: type(OCS3, OCS_OCSSIM, OCS_MCIPSIM, MCP)
+         */
         String args = "";
-        switch (SimulatorCategory.getCategoryByString(job.getSimulator())) {
+        switch (SimulatorCategory.getByString(job.getSimulator())) {
             case MCPSIM:
                 String configPath = String.format("%s ", job.getConfigDirPath());
                 String logPath = String.format("%s ", job.getGroupDirPath());
