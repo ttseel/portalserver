@@ -1,5 +1,7 @@
 package com.samsung.portalserver.repository;
 
+import static com.samsung.portalserver.repository.DBConstants.usp_find_new_sim;
+
 import com.samsung.portalserver.domain.SimBoard;
 import com.samsung.portalserver.schedule.job.NewSimulationJobDto;
 import java.util.List;
@@ -102,7 +104,7 @@ public class SimBoardRepositoryImpl implements SimBoardRepository {
 
     @Override
     public NewSimulationJobDto findNewSim(int executionServer) {
-        StoredProcedureQuery query = em.createStoredProcedureQuery("HYPPEOPLE.usp_find_new_sim");
+        StoredProcedureQuery query = em.createStoredProcedureQuery(usp_find_new_sim);
         query.registerStoredProcedureParameter("execution_server", Integer.class, ParameterMode.IN);
         query.registerStoredProcedureParameter("o_fsl_name", String.class, ParameterMode.OUT);
         query.registerStoredProcedureParameter("o_user", String.class, ParameterMode.OUT);

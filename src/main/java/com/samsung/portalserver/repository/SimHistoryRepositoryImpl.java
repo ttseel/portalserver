@@ -1,5 +1,7 @@
 package com.samsung.portalserver.repository;
 
+import static com.samsung.portalserver.repository.DBConstants.usp_move_from_board_to_history;
+
 import com.samsung.portalserver.domain.SimHistory;
 import com.samsung.portalserver.schedule.job.ScenarioJob;
 import java.time.LocalDateTime;
@@ -43,8 +45,7 @@ public class SimHistoryRepositoryImpl implements SimHistoryRepository {
 
     @Override
     public Long moveFromBoardToHistory(ScenarioJob job) {
-        StoredProcedureQuery query = em.createStoredProcedureQuery(
-            "HYPPEOPLE.usp_move_from_board_to_history");
+        StoredProcedureQuery query = em.createStoredProcedureQuery(usp_move_from_board_to_history);
         query.registerStoredProcedureParameter("sim_board_no", Long.class, ParameterMode.IN);
         query.registerStoredProcedureParameter("h_completed_rep", Integer.class, ParameterMode.IN);
         query.registerStoredProcedureParameter("h_termination_reason", String.class,
