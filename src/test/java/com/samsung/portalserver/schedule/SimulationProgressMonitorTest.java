@@ -1,6 +1,6 @@
 package com.samsung.portalserver.schedule;
 
-import com.samsung.portalserver.schedule.job.SimulationJob;
+import com.samsung.portalserver.schedule.job.SimulationJobList;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,7 +11,7 @@ class SimulationProgressMonitorTest {
 
     @Test
     void removeJobFromMonitoring() {
-        SimulationJob simulationJob = new SimulationJob();
+        SimulationJobList simulationJob = new SimulationJobList();
 
         progressMonitor.addNewJob(simulationJob);
         assertEquals(1, progressMonitor.count());

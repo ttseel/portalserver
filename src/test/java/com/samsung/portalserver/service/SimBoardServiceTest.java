@@ -47,8 +47,8 @@ class SimBoardServiceTest {
     @Test
     void saveScenarioFile() {
         String saveDirectoryPath =
-            FileService.HISTORY_DIR_PATH + FileService.DIR_DELIMETER + "TESTCODE_USER"
-                + FileService.DIR_DELIMETER + "TESTCODE_SIMULATOR" + FileService.DIR_DELIMETER
+            FileConstants.HISTORY_DIR_PATH + FileConstants.DIR_DELIMETER + "TESTCODE_USER"
+                + FileConstants.DIR_DELIMETER + "TESTCODE_SIMULATOR" + FileConstants.DIR_DELIMETER
                 + "TESTCODE_SCENARIO";
 
         reservationService.saveScenarioFile(saveDirectoryPath, fslFile, fssFiles);
@@ -56,26 +56,6 @@ class SimBoardServiceTest {
         assertThat(fileService.aleadyExistFileOrDir(saveDirectoryPath)).isEqualTo(true);
 
         fileService.deleteDirectory(
-            FileService.HISTORY_DIR_PATH + FileService.DIR_DELIMETER + "TESTCODE_USER");
-    }
-
-    @Test
-    @Transactional
-//    @Rollback(false)
-    void updateCurrentRep() {
-        Optional<SimBoard> simBoard = simBoardService.readUniqueRecord(72);
-
-        if (!simBoard.isPresent()) {
-            throw new IllegalStateException("Test record has been deleted");
-        }
-
-        int beforeRep = simBoard.get().getCurrent_rep();
-        int afterRep = beforeRep + 1;
-        simBoard.ifPresent(sb -> sb.setCurrent_rep(afterRep));
-        simBoardService.commitSimBoard();
-
-        Optional<SimBoard> simBoardAfterUpdate = simBoardService.readUniqueRecord(72);
-
-        assertThat(afterRep).isEqualTo(simBoardAfterUpdate.get().getCurrent_rep());
+            FileConstants.HISTORY_DIR_PATH + FileConstants.DIR_DELIMETER + "TESTCODE_USER");
     }
 }

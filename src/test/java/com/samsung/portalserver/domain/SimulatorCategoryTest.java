@@ -1,5 +1,6 @@
 package com.samsung.portalserver.domain;
 
+import com.samsung.portalserver.simulation.SimulatorCategory;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
