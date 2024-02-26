@@ -3,16 +3,16 @@ package com.samsung.portalserver.simulation;
 import static com.samsung.portalserver.service.FileConstants.SIMULATOR_DIR_PATH;
 
 import com.samsung.portalserver.exceptions.GroupLevelException;
-import com.samsung.portalserver.schedule.job.SimulationJobList;
+import com.samsung.portalserver.schedule.job.ScenarioGroupJob;
 import java.io.IOException;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ExternalJarAbstractSimulatorFactory extends AbstractSimulatorFactory {
+public class ExternalJarSimulatorFactory extends AbstractSimulatorFactory {
 
     @Override
-    public Optional<Process> create(SimulationJobList job) throws IOException {
+    public Optional<Process> create(ScenarioGroupJob job) throws IOException {
         Runtime rt = Runtime.getRuntime();
         Process process;
 

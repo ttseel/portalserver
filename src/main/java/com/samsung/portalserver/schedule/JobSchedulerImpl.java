@@ -11,8 +11,8 @@ import com.samsung.portalserver.exceptions.GroupLevelException;
 import com.samsung.portalserver.repository.SimBoardStatus;
 import com.samsung.portalserver.schedule.job.Job;
 import com.samsung.portalserver.schedule.job.NewSimulationJobDto;
+import com.samsung.portalserver.schedule.job.ScenarioGroupJob;
 import com.samsung.portalserver.schedule.job.ScenarioJob;
-import com.samsung.portalserver.schedule.job.SimulationJobList;
 import com.samsung.portalserver.service.FileService;
 import com.samsung.portalserver.service.SimBoardService;
 import com.samsung.portalserver.service.SimHistoryService;
@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -53,7 +52,7 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
      * Try scheduling every T seconds
      */
     @Override
-    @Scheduled(fixedDelay = 10000)
+//    @Scheduled(fixedDelay = 10000)
     public void tryScheduling() {
         System.out.println(String.format("tryScheduling start / thread name: %s ",
             Thread.currentThread().getName()));
@@ -63,17 +62,16 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
                 Optional<List<SimBoard>> newJobs = findNewJob();
 
                 if (newJobs.isPresent() && !newJobs.get().isEmpty()) {
-                    SimulationJobList simulationJobList = new SimulationJobList(
-                        newJobs.get().get(0));
+                    ScenarioGroupJob scenarioGroupJob = new ScenarioGroupJob(newJobs.get().get(0));
                     newJobs.get().forEach(simBoard -> {
-                        simulationJobList.getScenarioMap()
+                        scenarioGroupJob.getScenarioMap()
                             .put(simBoard.getScenario(), new ScenarioJob(simBoard));
                     });
 
                     // try scheduling
-                    prepare(simulationJobList);
-                    executeJob(simulationJobList);
-                    this.progressMonitor.addNewJob(simulationJobList);
+                    prepare(scenarioGroupJob);
+                    executeJob(scenarioGroupJob);
+                    this.progressMonitor.addNewJob(scenarioGroupJob);
                 } else {
                     System.out.println("SIM_BOARD does not have RESERVED Job");
                 }
@@ -83,7 +81,6 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
                 SimBoardStatus.ERROR.name());
         } catch (Exception e) {
             e.printStackTrace();
-
         }
     }
 
@@ -131,13 +128,13 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
 
     @Override
     public void prepare(Job job) {
-        SimulationJobList simulationJobList = (SimulationJobList) job;
+        ScenarioGroupJob scenarioGroupJob = (ScenarioGroupJob) job;
         Optional<ConfigBuilder> configBuilder = setConfigBuilder(
-            SimulatorCategory.getByString(simulationJobList.getSimulator()));
+            SimulatorCategory.getByString(scenarioGroupJob.getSimulator()));
         try {
             if (configBuilder.isPresent()) {
-                prepareScenarioConfigFiles(simulationJobList);
-                configBuilder.get().build(simulationJobList);
+                prepareScenarioConfigFiles(scenarioGroupJob);
+                configBuilder.get().build(scenarioGroupJob);
             }
         } catch (Exception e) {
             // prepare 과정에서 문제가 발생하면 SIM_BOARD status를 ERROR로 변경
@@ -155,40 +152,40 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
         }
     }
 
-    public void prepareScenarioConfigFiles(SimulationJobList simulationJobList) {
+    public void prepareScenarioConfigFiles(ScenarioGroupJob scenarioGroupJob) {
 
         // Set scenario group path
         String groupPath =
-            HISTORY_DIR_PATH + DIR_DELIMETER + simulationJobList.getUser() + DIR_DELIMETER
-                + simulationJobList.getSimulator() + DIR_DELIMETER + simulationJobList.getFslName();
-        simulationJobList.setGroupDirPath(groupPath);
+            HISTORY_DIR_PATH + DIR_DELIMETER + scenarioGroupJob.getUser() + DIR_DELIMETER
+                + scenarioGroupJob.getSimulator() + DIR_DELIMETER + scenarioGroupJob.getFslName();
+        scenarioGroupJob.setGroupDirPath(groupPath);
 
         // Set scenario config path
         String configPath =
-            HISTORY_DIR_PATH + DIR_DELIMETER + simulationJobList.getUser() + DIR_DELIMETER
-                + simulationJobList.getSimulator() + DIR_DELIMETER + simulationJobList.getFslName()
+            HISTORY_DIR_PATH + DIR_DELIMETER + scenarioGroupJob.getUser() + DIR_DELIMETER
+                + scenarioGroupJob.getSimulator() + DIR_DELIMETER + scenarioGroupJob.getFslName()
                 + DIR_DELIMETER + CONFIG_DIR_NAME;
-        simulationJobList.setConfigDirPath(configPath);
+        scenarioGroupJob.setConfigDirPath(configPath);
 
-        if (!existInCurrentServer(simulationJobList)) {
+        if (!existInCurrentServer(scenarioGroupJob)) {
             // 현재 서버에 없다면 다른 서버에 요청(요청 받는 서버에서 삭제까지 수행)
             System.out.println(
                 String.format("Current Server(no: %d) does not have a Scenario config files.",
                     CURRENT_SERVER_TEMP));
             System.out.println(String.format("Request config files from Server: %d",
-                simulationJobList.getExecution_server()));
-            requestSimConfigFiles(simulationJobList);
-            moveToConfigDirectory(simulationJobList);
+                scenarioGroupJob.getExecution_server()));
+            requestSimConfigFiles(scenarioGroupJob);
+            moveToConfigDirectory(scenarioGroupJob);
         }
-        setFilePathIntoJob(simulationJobList);
+        setFilePathIntoJob(scenarioGroupJob);
     }
 
 
-    private boolean existInCurrentServer(SimulationJobList job) {
+    private boolean existInCurrentServer(ScenarioGroupJob job) {
         return Objects.equals(job.getReservation_server(), CURRENT_SERVER_TEMP);
     }
 
-    private void setFilePathIntoJob(SimulationJobList job) {
+    private void setFilePathIntoJob(ScenarioGroupJob job) {
         List<String> fileNameList = fileService.getFileList(job.getConfigDirPath());
         fileNameList.forEach(fileName -> {
             String[] splited = fileName.split("\\.");
@@ -202,29 +199,29 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
         });
     }
 
-    private void requestSimConfigFiles(SimulationJobList job) {
+    private void requestSimConfigFiles(ScenarioGroupJob job) {
 
     }
 
-    private void moveToConfigDirectory(SimulationJobList job) {
+    private void moveToConfigDirectory(ScenarioGroupJob job) {
         fileService.createDirectories(job.getConfigDirPath());
 //        job.setConfigDirPath();
     }
 
     @Override
     public void executeJob(Job job) throws IOException {
-        SimulationJobList simulationJobList = (SimulationJobList) job;
+        ScenarioGroupJob scenarioGroupJob = (ScenarioGroupJob) job;
 
-        Optional<Process> process = simulatorFactory.create(simulationJobList);
-        process.ifPresent(p -> simulationJobList.setProcess(p));
+        Optional<Process> process = simulatorFactory.create(scenarioGroupJob);
+        process.ifPresent(p -> scenarioGroupJob.setProcess(p));
     }
 
     @Override
     public void update(Subscribable s, Object arg) {
-        Map<SimulationJobList, List<ScenarioJob>> statusChangedJobs = (Map<SimulationJobList, List<ScenarioJob>>) arg;
+        Map<ScenarioGroupJob, List<ScenarioJob>> statusChangedJobs = (Map<ScenarioGroupJob, List<ScenarioJob>>) arg;
 
         try {
-            for (SimulationJobList job : statusChangedJobs.keySet()) {
+            for (ScenarioGroupJob job : statusChangedJobs.keySet()) {
                 job.getScenarioMap().values().forEach(simulationJob -> {
                     simBoardService.updateSimBoardRecord(simulationJob);
                 });
@@ -242,7 +239,7 @@ public class JobSchedulerImpl implements JobScheduler, Subscriber {
         }
     }
 
-    private boolean isProcessTerminated(SimulationJobList job) {
+    private boolean isProcessTerminated(ScenarioGroupJob job) {
         return job.getProcess().isAlive();
     }
 }

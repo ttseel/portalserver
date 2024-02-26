@@ -37,4 +37,5 @@ out/
 .vscode/
 
 ### Simulation ###
-/src/main/java/com/samsung/portalserver/simulation/
+/src/main/java/com/samsung/portalserver/reference/
+/src/test/java/com/samsung/portalserver/reference/

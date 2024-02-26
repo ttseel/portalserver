@@ -1,24 +1,20 @@
 package com.samsung.portalserver.service;
 
+import static com.samsung.portalserver.service.FileConstants.DIR_DELIMETER;
+import static com.samsung.portalserver.service.FileConstants.HISTORY_DIR_PATH;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.samsung.portalserver.domain.SimBoard;
-import com.samsung.portalserver.repository.SimBoardRepository;
-import com.samsung.portalserver.repository.SimBoardRepositoryImpl;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.event.annotation.BeforeTestExecution;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class SimBoardServiceTest {
@@ -47,16 +43,14 @@ class SimBoardServiceTest {
     @Test
     void saveScenarioFile() {
         String saveDirectoryPath =
-            FileService.HISTORY_DIR_PATH + FileService.DIR_DELIMETER + "TESTCODE_USER"
-                + FileService.DIR_DELIMETER + "TESTCODE_SIMULATOR" + FileService.DIR_DELIMETER
-                + "TESTCODE_SCENARIO";
+            HISTORY_DIR_PATH + DIR_DELIMETER + "TESTCODE_USER" + DIR_DELIMETER
+                + "TESTCODE_SIMULATOR" + DIR_DELIMETER + "TESTCODE_SCENARIO";
 
         reservationService.saveScenarioFile(saveDirectoryPath, fslFile, fssFiles);
 
         assertThat(fileService.aleadyExistFileOrDir(saveDirectoryPath)).isEqualTo(true);
 
-        fileService.deleteDirectory(
-            FileService.HISTORY_DIR_PATH + FileService.DIR_DELIMETER + "TESTCODE_USER");
+        fileService.deleteDirectory(HISTORY_DIR_PATH + DIR_DELIMETER + "TESTCODE_USER");
     }
 
     @Test

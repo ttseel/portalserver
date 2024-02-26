@@ -68,7 +68,7 @@ public class FileService {
         File dir = new File(directoryPath);
         ArrayList<String> fileList = new ArrayList<>();
 
-        if (dir.length() > 0) {
+        if (dir.exists() && dir.list().length > 0) {
             fileList = (ArrayList<String>) Arrays.stream(Objects.requireNonNull(dir.list()))
                 .filter(file -> file.charAt(0) != '.') // .DS_Store 같은 시스템이 생성하는 파일 제외
                 .collect(Collectors.toList());

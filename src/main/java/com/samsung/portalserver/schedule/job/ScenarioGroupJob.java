@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SimulationJobList implements Job {
+public class ScenarioGroupJob implements Job {
 
     private Process process;
     private String configDirPath;
@@ -25,10 +25,10 @@ public class SimulationJobList implements Job {
     private LocalDateTime start_date;
     private Map<String, ScenarioJob> scenarioMap;
 
-    public SimulationJobList() {
+    public ScenarioGroupJob() {
     }
 
-    public SimulationJobList(SimBoard simBoard) {
+    public ScenarioGroupJob(SimBoard simBoard) {
         this.fslName = simBoard.getFsl_name();
         this.simulator = simBoard.getSimulator();
         this.version = simBoard.getVersion();

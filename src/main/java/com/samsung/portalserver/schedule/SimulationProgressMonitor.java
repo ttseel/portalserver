@@ -7,7 +7,7 @@ import com.samsung.portalserver.common.Subscriber;
 import com.samsung.portalserver.repository.SimBoardStatus;
 import com.samsung.portalserver.schedule.job.Job;
 import com.samsung.portalserver.schedule.job.ScenarioJob;
-import com.samsung.portalserver.schedule.job.SimulationJobList;
+import com.samsung.portalserver.schedule.job.ScenarioGroupJob;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -23,18 +23,18 @@ import org.springframework.stereotype.Component;
 public class SimulationProgressMonitor implements ProgressMonitor {
 
     private List<Subscriber> subs = new ArrayList<>();
-    private List<SimulationJobList> monitoringList = new ArrayList<>();
+    private List<ScenarioGroupJob> monitoringList = new ArrayList<>();
 
     @Override
     public void addNewJob(Job job) {
-        SimulationJobList simulationJobList = (SimulationJobList) job;
-        monitoringList.add(simulationJobList);
+        ScenarioGroupJob scenarioGroupJob = (ScenarioGroupJob) job;
+        monitoringList.add(scenarioGroupJob);
     }
 
     @Override
     public void removeJob(Job job) {
-        SimulationJobList simulationJobList = (SimulationJobList) job;
-        monitoringList.remove(simulationJobList);
+        ScenarioGroupJob scenarioGroupJob = (ScenarioGroupJob) job;
+        monitoringList.remove(scenarioGroupJob);
     }
 
     @Override
@@ -48,8 +48,8 @@ public class SimulationProgressMonitor implements ProgressMonitor {
         System.out.println(String.format("monitoringProgress start / thread name: %s ",
             Thread.currentThread().getName()));
 
-        Map<SimulationJobList, List<ScenarioJob>> changedJobs = new ConcurrentHashMap<>();
-        for (SimulationJobList job : monitoringList) {
+        Map<ScenarioGroupJob, List<ScenarioJob>> changedJobs = new ConcurrentHashMap<>();
+        for (ScenarioGroupJob job : monitoringList) {
             List<ScenarioJob> changedSims = checkSimulationStatus(job);
             if (changedSims.size() > 0) {
                 changedJobs.put(job, changedSims);
@@ -59,7 +59,7 @@ public class SimulationProgressMonitor implements ProgressMonitor {
     }
 
 
-    public List<ScenarioJob> checkSimulationStatus(SimulationJobList job) {
+    public List<ScenarioJob> checkSimulationStatus(ScenarioGroupJob job) {
         List<ScenarioJob> changedSimulation = new ArrayList<>();
 
         String fslFilePath = job.getFslFilePath();
@@ -129,10 +129,10 @@ public class SimulationProgressMonitor implements ProgressMonitor {
 
     public boolean stopSimulation(UniqueSimulationRecordDto dto) {
         boolean isStopped = false;
-        Optional<SimulationJobList> simulationJobList = findStopGroup(dto);
+        Optional<ScenarioGroupJob> simulationJobList = findStopGroup(dto);
         if (simulationJobList.isPresent()) {
 
-            SimulationJobList removeTarget = simulationJobList.get();
+            ScenarioGroupJob removeTarget = simulationJobList.get();
             removeTarget.getProcess().destroy();
 
             if (!removeTarget.getProcess().isAlive()) {
@@ -144,16 +144,16 @@ public class SimulationProgressMonitor implements ProgressMonitor {
         return isStopped;
     }
 
-    private Optional<SimulationJobList> findStopGroup(UniqueSimulationRecordDto dto) {
-        for (SimulationJobList simulationJobList : monitoringList) {
-            if (isStopGroup(simulationJobList, dto)) {
-                return Optional.of(simulationJobList);
+    private Optional<ScenarioGroupJob> findStopGroup(UniqueSimulationRecordDto dto) {
+        for (ScenarioGroupJob scenarioGroupJob : monitoringList) {
+            if (isStopGroup(scenarioGroupJob, dto)) {
+                return Optional.of(scenarioGroupJob);
             }
         }
         return Optional.empty();
     }
 
-    private boolean isStopGroup(SimulationJobList jobList, UniqueSimulationRecordDto dto) {
+    private boolean isStopGroup(ScenarioGroupJob jobList, UniqueSimulationRecordDto dto) {
         if (jobList.getFslName().equals(dto.getGroup()) && jobList.getUser().equals(dto.getUser())
             && jobList.getSimulator().equals(dto.getSimulator())) {
             return true;
@@ -161,7 +161,7 @@ public class SimulationProgressMonitor implements ProgressMonitor {
         return false;
     }
 
-    private void notifyChangedStatus(Map<SimulationJobList, List<ScenarioJob>> statusChangedJobs) {
+    private void notifyChangedStatus(Map<ScenarioGroupJob, List<ScenarioJob>> statusChangedJobs) {
         notifytSubscribers(statusChangedJobs);
     }
 

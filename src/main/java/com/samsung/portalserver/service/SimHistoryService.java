@@ -55,6 +55,7 @@ public class SimHistoryService {
         private String scenario;
         private String simulator;
         private String version;
+        private List<String> user = new ArrayList<>();
         private Integer endRep;
         private Integer requestRep;
         private LocalDateTime startDate;
@@ -69,6 +70,7 @@ public class SimHistoryService {
             this.scenario = simHistory.getScenario();
             this.simulator = simHistory.getSimulator();
             this.version = simHistory.getVersion();
+            this.user.add(simHistory.getUser());
             this.endRep = simHistory.getCompleted_rep();
             this.requestRep = simHistory.getRequest_rep();
             this.startDate = simHistory.getStart_date();

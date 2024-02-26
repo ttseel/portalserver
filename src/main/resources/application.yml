@@ -6,7 +6,7 @@ spring:
   datasource: # MySQL 설정
     driver-class-name: com.mysql.cj.jdbc.Driver
     password: devpass
-    url: jdbc:mysql://localhost:3306/HYPPEOPLE?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/HYPPEOPLE?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true&noAccessToProcedureBodies=True
     username: devuser
   jpa:
     database: mysql # MySQL 사용
@@ -14,7 +14,7 @@ spring:
     generate-ddl: false # DDL 정의시 데이터베이스의 고유 기능을 사용 ex) 테이블 생성, 삭제 등
     properties:
       hibernate:
-        show_sql: true # API 호출시, SQL 문을 콘솔에 출력한다.
+        show_sql: false # API 호출시, SQL 문을 콘솔에 출력한다.
         format_sql: true # 출력되는 SQL 문 줄바꿈, 들여쓰기 적용
 
 
